@@ -1,1056 +1,1709 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="dark">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Habit Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <style>
-    :root, [data-theme="dark"] {
-      --bg: #0b0e14;
-      --surface: #141821;
-      --surface2: #1c2230;
-      --surface3: #252d3d;
-      --border: #2a3347;
-      --text: #e8ecf4;
-      --text-muted: #8b95a8;
-      --text-dim: #5c677a;
-      --accent: #5b8def;
-      --accent-hover: #4a7de0;
-      --success: #34d399;
-      --warning: #fbbf24;
-      --danger: #f87171;
-      --purple: #a78bfa;
-      --pink: #f472b6;
-      --orange: #fb923c;
-      --radius: 12px;
-      --radius-sm: 8px;
-      --shadow: 0 4px 24px rgba(0,0,0,0.4);
-      --sidebar-w: 240px;
-    }
-    [data-theme="light"] {
-      --bg: #f4f6fa;
-      --surface: #ffffff;
-      --surface2: #f0f3f9;
-      --surface3: #e4e9f2;
-      --border: #d5dce8;
-      --text: #1a2030;
-      --text-muted: #5a6577;
-      --text-dim: #8b95a8;
-      --accent: #3b6fd9;
-      --accent-hover: #2f5fc4;
-      --shadow: 0 4px 20px rgba(0,0,0,0.08);
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Habit Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+      :root,
+      [data-theme="dark"] {
+        --bg: #0b0e14;
+        --surface: #141821;
+        --surface2: #1c2230;
+        --surface3: #252d3d;
+        --border: #2a3347;
+        --text: #e8ecf4;
+        --text-muted: #8b95a8;
+        --text-dim: #5c677a;
+        --accent: #5b8def;
+        --accent-hover: #4a7de0;
+        --success: #34d399;
+        --warning: #fbbf24;
+        --danger: #f87171;
+        --purple: #a78bfa;
+        --pink: #f472b6;
+        --orange: #fb923c;
+        --radius: 12px;
+        --radius-sm: 8px;
+        --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        --sidebar-w: 240px;
+      }
+      [data-theme="light"] {
+        --bg: #f4f6fa;
+        --surface: #ffffff;
+        --surface2: #f0f3f9;
+        --surface3: #e4e9f2;
+        --border: #d5dce8;
+        --text: #1a2030;
+        --text-muted: #5a6577;
+        --text-dim: #8b95a8;
+        --accent: #3b6fd9;
+        --accent-hover: #2f5fc4;
+        --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      line-height: 1.5;
-      font-size: 14px;
-    }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          "Inter",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        line-height: 1.5;
+        font-size: 14px;
+      }
 
-    /* Layout */
-    .layout {
-      display: flex;
-      min-height: 100vh;
-    }
-    .sidebar {
-      width: var(--sidebar-w);
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 0; left: 0; bottom: 0;
-      z-index: 50;
-      transition: transform 0.25s ease;
-    }
-    .sidebar-header {
-      padding: 22px 20px 16px;
-      border-bottom: 1px solid var(--border);
-    }
-    .logo {
-      font-size: 1.25rem;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .logo-icon {
-      width: 32px; height: 32px;
-      background: linear-gradient(135deg, var(--accent), var(--purple));
-      border-radius: 9px;
-      display: grid;
-      place-items: center;
-      font-size: 16px;
-    }
-    .nav {
-      padding: 16px 12px;
-      flex: 1;
-      overflow-y: auto;
-    }
-    .nav-label {
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-dim);
-      padding: 8px 12px 6px;
-    }
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: var(--radius-sm);
-      color: var(--text-muted);
-      cursor: pointer;
-      font-weight: 500;
-      transition: all 0.15s;
-      margin-bottom: 2px;
-      border: none;
-      background: none;
-      width: 100%;
-      text-align: left;
-      font-size: 0.9rem;
-      font-family: inherit;
-    }
-    .nav-item:hover { background: var(--surface2); color: var(--text); }
-    .nav-item.active {
-      background: var(--accent);
-      color: white;
-    }
-    .nav-item .icon { font-size: 1.1rem; width: 22px; text-align: center; }
-
-    .sidebar-footer {
-      padding: 14px 16px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .main {
-      flex: 1;
-      margin-left: var(--sidebar-w);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Top bar */
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 28px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 40;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .topbar-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .page-title {
-      font-size: 1.35rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-    .date-nav {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    /* Buttons */
-    button, .btn {
-      font-family: inherit;
-      font-size: 0.875rem;
-      font-weight: 500;
-      border: none;
-      border-radius: var(--radius-sm);
-      padding: 9px 14px;
-      cursor: pointer;
-      transition: all 0.15s;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-    }
-    .btn-primary {
-      background: var(--accent);
-      color: white;
-    }
-    .btn-primary:hover { background: var(--accent-hover); }
-    .btn-ghost {
-      background: var(--surface2);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .btn-ghost:hover { background: var(--surface3); }
-    .btn-icon {
-      width: 36px; height: 36px;
-      padding: 0;
-      justify-content: center;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: var(--radius-sm);
-    }
-    .btn-icon:hover { background: var(--surface3); }
-    .btn-danger {
-      background: transparent;
-      color: var(--danger);
-      border: 1px solid transparent;
-      padding: 6px 10px;
-    }
-    .btn-danger:hover { background: rgba(248,113,113,0.12); }
-    .btn-sm { padding: 6px 10px; font-size: 0.8rem; }
-
-    /* Content */
-    .content {
-      padding: 24px 28px 60px;
-      flex: 1;
-    }
-
-    /* Stats row */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 14px;
-      margin-bottom: 24px;
-    }
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px 20px;
-    }
-    .stat-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-bottom: 6px;
-    }
-    .stat-value {
-      font-size: 1.7rem;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-    }
-    .stat-value.accent { color: var(--accent); }
-    .stat-value.success { color: var(--success); }
-    .stat-value.warning { color: var(--warning); }
-
-    /* Cards */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 16px;
-    }
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .card-title {
-      font-size: 1rem;
-      font-weight: 600;
-    }
-
-    /* Habit item */
-    .habit-list { display: flex; flex-direction: column; gap: 12px; }
-    .habit-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px 18px;
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 16px;
-      align-items: center;
-      transition: border-color 0.15s;
-    }
-    .habit-item:hover { border-color: var(--accent); }
-    .habit-check {
-      width: 28px; height: 28px;
-      border-radius: 8px;
-      border: 2px solid var(--border);
-      display: grid;
-      place-items: center;
-      cursor: pointer;
-      transition: all 0.15s;
-      flex-shrink: 0;
-      font-size: 14px;
-      color: transparent;
-    }
-    .habit-check.done {
-      background: var(--success);
-      border-color: var(--success);
-      color: white;
-    }
-    .habit-check:hover { border-color: var(--accent); }
-    .habit-info h3 {
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin-bottom: 2px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .habit-meta {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      background: var(--surface3);
-      color: var(--text-muted);
-    }
-    .streak-badge {
-      color: var(--warning);
-      font-weight: 600;
-    }
-    .progress-wrap {
-      width: 100%;
-      max-width: 180px;
-      height: 6px;
-      background: var(--surface3);
-      border-radius: 4px;
-      overflow: hidden;
-      margin-top: 6px;
-    }
-    .progress-bar {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 0.3s ease;
-    }
-    .habit-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .count-controls {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .count-btn {
-      width: 28px; height: 28px;
-      border-radius: 7px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 1rem;
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-    }
-    .count-btn:hover { background: var(--surface3); }
-    .count-value {
-      min-width: 48px;
-      text-align: center;
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-
-    /* Week / Month grids */
-    .week-header, .month-header {
-      display: grid;
-      grid-template-columns: 180px repeat(7, 1fr);
-      gap: 6px;
-      margin-bottom: 8px;
-      padding: 0 4px;
-    }
-    .week-header span, .month-header span {
-      text-align: center;
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-    }
-    .habit-row {
-      display: grid;
-      grid-template-columns: 180px repeat(7, 1fr);
-      gap: 6px;
-      align-items: center;
-      padding: 10px 4px;
-      border-bottom: 1px solid var(--border);
-    }
-    .habit-row:last-child { border-bottom: none; }
-    .habit-row-name {
-      font-weight: 500;
-      font-size: 0.875rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .day-cell {
-      aspect-ratio: 1;
-      max-width: 42px;
-      margin: 0 auto;
-      border-radius: 8px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      display: grid;
-      place-items: center;
-      cursor: pointer;
-      font-size: 0.75rem;
-      font-weight: 600;
-      transition: all 0.12s;
-      position: relative;
-    }
-    .day-cell:hover { border-color: var(--accent); transform: scale(1.06); }
-    .day-cell.done {
-      background: var(--success);
-      border-color: var(--success);
-      color: white;
-    }
-    .day-cell.partial {
-      background: color-mix(in srgb, var(--warning) 40%, var(--surface2));
-      border-color: var(--warning);
-    }
-    .day-cell.today { box-shadow: 0 0 0 2px var(--accent); }
-    .day-cell.future { opacity: 0.35; cursor: default; pointer-events: none; }
-
-    /* Month heat map */
-    .month-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
-    }
-    .month-day {
-      aspect-ratio: 1;
-      border-radius: 8px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 0.8rem;
-      transition: all 0.12s;
-    }
-    .month-day:hover { border-color: var(--accent); }
-    .month-day.other-month { opacity: 0.3; }
-    .month-day.today { box-shadow: 0 0 0 2px var(--accent); }
-    .month-day .pct {
-      font-size: 0.65rem;
-      color: var(--text-muted);
-      margin-top: 1px;
-    }
-    .heat-0 { background: var(--surface2); }
-    .heat-1 { background: color-mix(in srgb, var(--success) 25%, var(--surface2)); }
-    .heat-2 { background: color-mix(in srgb, var(--success) 50%, var(--surface2)); }
-    .heat-3 { background: color-mix(in srgb, var(--success) 75%, var(--surface2)); }
-    .heat-4 { background: var(--success); color: white; }
-
-    /* Notes */
-    .notes-area {
-      width: 100%;
-      min-height: 100px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 14px;
-      color: var(--text);
-      font-family: inherit;
-      font-size: 0.9rem;
-      resize: vertical;
-      outline: none;
-    }
-    .notes-area:focus { border-color: var(--accent); }
-
-    /* Charts */
-    .charts-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-    .chart-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-    }
-    .chart-card h3 {
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin-bottom: 16px;
-    }
-    .chart-wrap { position: relative; height: 240px; }
-
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.55);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      padding: 20px;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      width: 100%;
-      max-width: 480px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: var(--shadow);
-    }
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 18px 22px;
-      border-bottom: 1px solid var(--border);
-    }
-    .modal-header h2 { font-size: 1.1rem; font-weight: 600; }
-    .modal-body { padding: 22px; }
-    .modal-footer {
-      padding: 14px 22px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-    }
-    .form-group { margin-bottom: 16px; }
-    .form-group label {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-bottom: 6px;
-    }
-    .form-group input, .form-group select, .form-group textarea {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 11px 14px;
-      color: var(--text);
-      font-size: 0.9rem;
-      font-family: inherit;
-      outline: none;
-    }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-      border-color: var(--accent);
-    }
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-    .color-options {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .color-swatch {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 2px solid transparent;
-      transition: transform 0.12s;
-    }
-    .color-swatch:hover { transform: scale(1.15); }
-    .color-swatch.selected { border-color: var(--text); box-shadow: 0 0 0 2px var(--bg); }
-
-    /* Empty */
-    .empty {
-      text-align: center;
-      padding: 50px 20px;
-      color: var(--text-muted);
-    }
-    .empty h3 { color: var(--text); margin-bottom: 8px; font-size: 1.15rem; }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 28px;
-      left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: var(--surface3);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 12px 22px;
-      border-radius: 12px;
-      font-size: 0.875rem;
-      box-shadow: var(--shadow);
-      opacity: 0;
-      transition: all 0.3s ease;
-      z-index: 200;
-      pointer-events: none;
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    /* Mobile */
-    .menu-btn { display: none; }
-    @media (max-width: 860px) {
+      /* Layout */
+      .layout {
+        display: flex;
+        min-height: 100vh;
+      }
       .sidebar {
-        transform: translateX(-100%);
+        width: var(--sidebar-w);
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 50;
+        transition: transform 0.25s ease;
       }
-      .sidebar.open { transform: translateX(0); }
-      .main { margin-left: 0; }
-      .menu-btn { display: inline-flex; }
-      .charts-grid { grid-template-columns: 1fr; }
-      .week-header, .habit-row {
-        grid-template-columns: 120px repeat(7, 1fr);
+      .sidebar-header {
+        padding: 22px 20px 16px;
+        border-bottom: 1px solid var(--border);
       }
-      .content { padding: 16px; }
-      .topbar { padding: 12px 16px; }
-      .form-row { grid-template-columns: 1fr; }
-    }
-    .overlay-mobile {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      z-index: 45;
-    }
-    .overlay-mobile.show { display: block; }
+      .logo {
+        font-size: 1.25rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .logo-icon {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, var(--accent), var(--purple));
+        border-radius: 9px;
+        display: grid;
+        place-items: center;
+        font-size: 16px;
+      }
+      .nav {
+        padding: 16px 12px;
+        flex: 1;
+        overflow-y: auto;
+      }
+      .nav-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-dim);
+        padding: 8px 12px 6px;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: var(--radius-sm);
+        color: var(--text-muted);
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.15s;
+        margin-bottom: 2px;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        font-size: 0.9rem;
+        font-family: inherit;
+      }
+      .nav-item:hover {
+        background: var(--surface2);
+        color: var(--text);
+      }
+      .nav-item.active {
+        background: var(--accent);
+        color: white;
+      }
+      .nav-item .icon {
+        font-size: 1.1rem;
+        width: 22px;
+        text-align: center;
+      }
 
-    /* Category colors */
-    .cat-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-  </style>
-</head>
-<body>
-  <div class="overlay-mobile" id="mobileOverlay"></div>
+      .sidebar-footer {
+        padding: 14px 16px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
 
-  <div class="layout">
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <div class="logo">
-          <div class="logo-icon">✓</div>
-          HabitDash
-        </div>
-      </div>
-      <nav class="nav">
-        <div class="nav-label">Views</div>
-        <button class="nav-item active" data-view="today"><span class="icon">☀</span> Today</button>
-        <button class="nav-item" data-view="week"><span class="icon">▦</span> Week</button>
-        <button class="nav-item" data-view="month"><span class="icon">▣</span> Month</button>
-        <button class="nav-item" data-view="analytics"><span class="icon">📊</span> Analytics</button>
+      .main {
+        flex: 1;
+        margin-left: var(--sidebar-w);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
 
-        <div class="nav-label" style="margin-top:18px;">Manage</div>
-        <button class="nav-item" data-view="habits"><span class="icon">◎</span> All Habits</button>
-        <button class="nav-item" id="notesNavBtn"><span class="icon">✎</span> Daily Notes</button>
-      </nav>
-      <div class="sidebar-footer">
-        <button class="btn btn-ghost" id="themeToggle" style="width:100%; justify-content:center;">
-          <span id="themeIcon">☾</span> <span id="themeLabel">Dark</span>
-        </button>
-        <button class="btn btn-ghost" id="reminderBtn" style="width:100%; justify-content:center;">
-          🔔 Reminders
-        </button>
-      </div>
-    </aside>
+      /* Top bar */
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 28px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .page-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+      .date-nav {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
 
-    <!-- Main -->
-    <div class="main">
-      <header class="topbar">
-        <div class="topbar-left">
-          <button class="btn-icon menu-btn" id="menuBtn">☰</button>
-          <h1 class="page-title" id="pageTitle">Today</h1>
-          <div class="date-nav" id="dateNav">
-            <button class="btn-icon" id="prevDate">‹</button>
-            <span id="currentDateLabel" style="font-weight:600; min-width:140px; text-align:center;"></span>
-            <button class="btn-icon" id="nextDate">›</button>
-            <button class="btn btn-ghost btn-sm" id="todayJump">Today</button>
+      /* Buttons */
+      button,
+      .btn {
+        font-family: inherit;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border: none;
+        border-radius: var(--radius-sm);
+        padding: 9px 14px;
+        cursor: pointer;
+        transition: all 0.15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: white;
+      }
+      .btn-primary:hover {
+        background: var(--accent-hover);
+      }
+      .btn-ghost {
+        background: var(--surface2);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      .btn-ghost:hover {
+        background: var(--surface3);
+      }
+      .btn-icon {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        justify-content: center;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: var(--radius-sm);
+      }
+      .btn-icon:hover {
+        background: var(--surface3);
+      }
+      .btn-danger {
+        background: transparent;
+        color: var(--danger);
+        border: 1px solid transparent;
+        padding: 6px 10px;
+      }
+      .btn-danger:hover {
+        background: rgba(248, 113, 113, 0.12);
+      }
+      .btn-sm {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+      }
+
+      /* Content */
+      .content {
+        padding: 24px 28px 60px;
+        flex: 1;
+      }
+
+      /* Stats row */
+      .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 14px;
+        margin-bottom: 24px;
+      }
+      .stat-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 18px 20px;
+      }
+      .stat-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 6px;
+      }
+      .stat-value {
+        font-size: 1.7rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+      .stat-value.accent {
+        color: var(--accent);
+      }
+      .stat-value.success {
+        color: var(--success);
+      }
+      .stat-value.warning {
+        color: var(--warning);
+      }
+
+      /* Cards */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px;
+        margin-bottom: 16px;
+      }
+      .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .card-title {
+        font-size: 1rem;
+        font-weight: 600;
+      }
+
+      /* Habit item */
+      .habit-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .habit-item {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 16px 18px;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 16px;
+        align-items: center;
+        transition: border-color 0.15s;
+      }
+      .habit-item:hover {
+        border-color: var(--accent);
+      }
+      .habit-check {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        border: 2px solid var(--border);
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        transition: all 0.15s;
+        flex-shrink: 0;
+        font-size: 14px;
+        color: transparent;
+      }
+      .habit-check.done {
+        background: var(--success);
+        border-color: var(--success);
+        color: white;
+      }
+      .habit-check:hover {
+        border-color: var(--accent);
+      }
+      .habit-info h3 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 2px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .habit-meta {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        background: var(--surface3);
+        color: var(--text-muted);
+      }
+      .streak-badge {
+        color: var(--warning);
+        font-weight: 600;
+      }
+      .progress-wrap {
+        width: 100%;
+        max-width: 180px;
+        height: 6px;
+        background: var(--surface3);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 6px;
+      }
+      .progress-bar {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+      }
+      .habit-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .count-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .count-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-size: 1rem;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+      }
+      .count-btn:hover {
+        background: var(--surface3);
+      }
+      .count-value {
+        min-width: 48px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      /* Week / Month grids */
+      .week-header,
+      .month-header {
+        display: grid;
+        grid-template-columns: 180px repeat(7, 1fr);
+        gap: 6px;
+        margin-bottom: 8px;
+        padding: 0 4px;
+      }
+      .week-header span,
+      .month-header span {
+        text-align: center;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+      }
+      .habit-row {
+        display: grid;
+        grid-template-columns: 180px repeat(7, 1fr);
+        gap: 6px;
+        align-items: center;
+        padding: 10px 4px;
+        border-bottom: 1px solid var(--border);
+      }
+      .habit-row:last-child {
+        border-bottom: none;
+      }
+      .habit-row-name {
+        font-weight: 500;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .day-cell {
+        aspect-ratio: 1;
+        max-width: 42px;
+        margin: 0 auto;
+        border-radius: 8px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        font-size: 0.75rem;
+        font-weight: 600;
+        transition: all 0.12s;
+        position: relative;
+      }
+      .day-cell:hover {
+        border-color: var(--accent);
+        transform: scale(1.06);
+      }
+      .day-cell.done {
+        background: var(--success);
+        border-color: var(--success);
+        color: white;
+      }
+      .day-cell.partial {
+        background: color-mix(in srgb, var(--warning) 40%, var(--surface2));
+        border-color: var(--warning);
+      }
+      .day-cell.today {
+        box-shadow: 0 0 0 2px var(--accent);
+      }
+      .day-cell.future {
+        opacity: 0.35;
+        cursor: default;
+        pointer-events: none;
+      }
+
+      /* Month heat map */
+      .month-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 6px;
+      }
+      .month-day {
+        aspect-ratio: 1;
+        border-radius: 8px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.12s;
+      }
+      .month-day:hover {
+        border-color: var(--accent);
+      }
+      .month-day.other-month {
+        opacity: 0.3;
+      }
+      .month-day.today {
+        box-shadow: 0 0 0 2px var(--accent);
+      }
+      .month-day .pct {
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        margin-top: 1px;
+      }
+      .heat-0 {
+        background: var(--surface2);
+      }
+      .heat-1 {
+        background: color-mix(in srgb, var(--success) 25%, var(--surface2));
+      }
+      .heat-2 {
+        background: color-mix(in srgb, var(--success) 50%, var(--surface2));
+      }
+      .heat-3 {
+        background: color-mix(in srgb, var(--success) 75%, var(--surface2));
+      }
+      .heat-4 {
+        background: var(--success);
+        color: white;
+      }
+
+      /* Notes */
+      .notes-area {
+        width: 100%;
+        min-height: 100px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 14px;
+        color: var(--text);
+        font-family: inherit;
+        font-size: 0.9rem;
+        resize: vertical;
+        outline: none;
+      }
+      .notes-area:focus {
+        border-color: var(--accent);
+      }
+
+      /* Charts */
+      .charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .chart-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px;
+      }
+      .chart-card h3 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 16px;
+      }
+      .chart-wrap {
+        position: relative;
+        height: 240px;
+      }
+
+      /* Modal */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        padding: 20px;
+      }
+      .modal-overlay.open {
+        display: flex;
+      }
+      .modal {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 480px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: var(--shadow);
+      }
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 22px;
+        border-bottom: 1px solid var(--border);
+      }
+      .modal-header h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+      .modal-body {
+        padding: 22px;
+      }
+      .modal-footer {
+        padding: 14px 22px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+      .form-group label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 6px;
+      }
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 11px 14px;
+        color: var(--text);
+        font-size: 0.9rem;
+        font-family: inherit;
+        outline: none;
+      }
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        border-color: var(--accent);
+      }
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .color-options {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .color-swatch {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: transform 0.12s;
+      }
+      .color-swatch:hover {
+        transform: scale(1.15);
+      }
+      .color-swatch.selected {
+        border-color: var(--text);
+        box-shadow: 0 0 0 2px var(--bg);
+      }
+
+      /* Empty */
+      .empty {
+        text-align: center;
+        padding: 50px 20px;
+        color: var(--text-muted);
+      }
+      .empty h3 {
+        color: var(--text);
+        margin-bottom: 8px;
+        font-size: 1.15rem;
+      }
+
+      /* Toast */
+      .toast {
+        position: fixed;
+        bottom: 28px;
+        left: 50%;
+        transform: translateX(-50%) translateY(80px);
+        background: var(--surface3);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 12px 22px;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        box-shadow: var(--shadow);
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 200;
+        pointer-events: none;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* Mobile */
+      .menu-btn {
+        display: none;
+      }
+      @media (max-width: 860px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+        .sidebar.open {
+          transform: translateX(0);
+        }
+        .main {
+          margin-left: 0;
+        }
+        .menu-btn {
+          display: inline-flex;
+        }
+        .charts-grid {
+          grid-template-columns: 1fr;
+        }
+        .week-header,
+        .habit-row {
+          grid-template-columns: 120px repeat(7, 1fr);
+        }
+        .content {
+          padding: 16px;
+        }
+        .topbar {
+          padding: 12px 16px;
+        }
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+      }
+      .overlay-mobile {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 45;
+      }
+      .overlay-mobile.show {
+        display: block;
+      }
+
+      /* Category colors */
+      .cat-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  </head>
+  <body>
+    <div class="overlay-mobile" id="mobileOverlay"></div>
+
+    <div class="layout">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="logo">
+            <div class="logo-icon">✓</div>
+            HabitDash
           </div>
         </div>
-        <div class="topbar-right">
-          <button class="btn btn-ghost" id="exportBtn">Export</button>
-          <button class="btn btn-primary" id="addHabitBtn">+ Add Habit</button>
-        </div>
-      </header>
+        <nav class="nav">
+          <div class="nav-label">Views</div>
+          <button class="nav-item active" data-view="today">
+            <span class="icon">☀</span> Today
+          </button>
+          <button class="nav-item" data-view="week">
+            <span class="icon">▦</span> Week
+          </button>
+          <button class="nav-item" data-view="month">
+            <span class="icon">▣</span> Month
+          </button>
+          <button class="nav-item" data-view="analytics">
+            <span class="icon">📊</span> Analytics
+          </button>
 
-      <div class="content" id="content">
-        <!-- Dynamic content -->
+          <div class="nav-label" style="margin-top: 18px">Manage</div>
+          <button class="nav-item" data-view="habits">
+            <span class="icon">◎</span> All Habits
+          </button>
+          <button class="nav-item" id="notesNavBtn">
+            <span class="icon">✎</span> Daily Notes
+          </button>
+        </nav>
+        <div class="sidebar-footer">
+          <button
+            class="btn btn-ghost"
+            id="themeToggle"
+            style="width: 100%; justify-content: center"
+          >
+            <span id="themeIcon">☾</span> <span id="themeLabel">Dark</span>
+          </button>
+          <button
+            class="btn btn-ghost"
+            id="reminderBtn"
+            style="width: 100%; justify-content: center"
+          >
+            🔔 Reminders
+          </button>
+
+          <!-- Supabase Account -->
+          <div
+            id="accountPanel"
+            style="
+              margin-top: 14px;
+              padding: 10px;
+              border: 1px solid var(--border);
+              border-radius: 10px;
+            "
+          >
+            <div style="font-weight: 600; margin-bottom: 8px">☁ My Account</div>
+
+            <div
+              id="accountStatus"
+              style="
+                font-size: 12px;
+                color: var(--text-muted);
+                margin-bottom: 8px;
+              "
+            >
+              Not signed in
+            </div>
+
+            <input
+              type="email"
+              id="accountEmail"
+              placeholder="Email address"
+              autocomplete="email"
+              style="
+                width: 100%;
+                margin-bottom: 8px;
+                padding: 9px;
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                background: var(--surface);
+                color: var(--text);
+              "
+            />
+
+            <input
+              type="password"
+              id="accountPassword"
+              placeholder="Password"
+              autocomplete="current-password"
+              style="
+                width: 100%;
+                margin-bottom: 8px;
+                padding: 9px;
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                background: var(--surface);
+                color: var(--text);
+              "
+            />
+
+            <button
+              class="btn btn-primary"
+              id="accountLogin"
+              style="width: 100%; justify-content: center; margin-bottom: 6px"
+            >
+              Sign In
+            </button>
+
+            <button
+              class="btn btn-ghost"
+              id="accountSignup"
+              style="width: 100%; justify-content: center; margin-bottom: 6px"
+            >
+              Create Account
+            </button>
+
+            <button
+              class="btn btn-ghost"
+              id="accountLogout"
+              style="width: 100%; justify-content: center; display: none"
+            >
+              Sign Out
+            </button>
+
+            <div
+              id="accountMessage"
+              style="font-size: 12px; margin-top: 8px; overflow-wrap: anywhere"
+            ></div>
+          </div>
+          <!-- End Supabase Account -->
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <div class="main">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button class="btn-icon menu-btn" id="menuBtn">☰</button>
+            <h1 class="page-title" id="pageTitle">Today</h1>
+            <div class="date-nav" id="dateNav">
+              <button class="btn-icon" id="prevDate">‹</button>
+              <span
+                id="currentDateLabel"
+                style="font-weight: 600; min-width: 140px; text-align: center"
+              ></span>
+              <button class="btn-icon" id="nextDate">›</button>
+              <button class="btn btn-ghost btn-sm" id="todayJump">Today</button>
+            </div>
+          </div>
+          <div class="topbar-right">
+            <button class="btn btn-ghost" id="exportBtn">Export</button>
+            <button class="btn btn-primary" id="addHabitBtn">
+              + Add Habit
+            </button>
+          </div>
+        </header>
+
+        <div class="content" id="content">
+          <!-- Dynamic content -->
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Add / Edit Habit Modal -->
-  <div class="modal-overlay" id="habitModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h2 id="modalTitle">Add Habit</h2>
-        <button class="btn-icon" id="closeModal">✕</button>
+    <!-- Add / Edit Habit Modal -->
+    <div class="modal-overlay" id="habitModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 id="modalTitle">Add Habit</h2>
+          <button class="btn-icon" id="closeModal">✕</button>
+        </div>
+        <form id="habitForm">
+          <div class="modal-body">
+            <div class="form-group">
+              <label>Habit name</label>
+              <input
+                type="text"
+                id="hName"
+                required
+                maxlength="60"
+                placeholder="e.g. Reading The Bible"
+              />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Category / Tag</label>
+                <input
+                  type="text"
+                  id="hCategory"
+                  placeholder="Spiritual, Health..."
+                  list="catList"
+                />
+                <datalist id="catList"></datalist>
+              </div>
+              <div class="form-group">
+                <label>Type</label>
+                <select id="hType">
+                  <option value="boolean">Simple check-off</option>
+                  <option value="count">Count / Quantity</option>
+                  <option value="duration">Time (minutes)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row" id="targetRow" style="display: none">
+              <div class="form-group">
+                <label>Daily target</label>
+                <input type="number" id="hTarget" min="1" value="1" />
+              </div>
+              <div class="form-group">
+                <label>Unit</label>
+                <input
+                  type="text"
+                  id="hUnit"
+                  placeholder="pages, glasses, min..."
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Color</label>
+              <div class="color-options" id="colorOptions">
+                <div
+                  class="color-swatch selected"
+                  data-color="#5b8def"
+                  style="background: #5b8def"
+                ></div>
+                <div
+                  class="color-swatch"
+                  data-color="#34d399"
+                  style="background: #34d399"
+                ></div>
+                <div
+                  class="color-swatch"
+                  data-color="#fbbf24"
+                  style="background: #fbbf24"
+                ></div>
+                <div
+                  class="color-swatch"
+                  data-color="#f87171"
+                  style="background: #f87171"
+                ></div>
+                <div
+                  class="color-swatch"
+                  data-color="#a78bfa"
+                  style="background: #a78bfa"
+                ></div>
+                <div
+                  class="color-swatch"
+                  data-color="#f472b6"
+                  style="background: #f472b6"
+                ></div>
+                <div
+                  class="color-swatch"
+                  data-color="#fb923c"
+                  style="background: #fb923c"
+                ></div>
+                <div
+                  class="color-swatch"
+                  data-color="#38bdf8"
+                  style="background: #38bdf8"
+                ></div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" id="cancelModal">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">Save Habit</button>
+          </div>
+        </form>
       </div>
-      <form id="habitForm">
+    </div>
+
+    <!-- Notes Modal -->
+    <div class="modal-overlay" id="notesModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Daily Notes — <span id="notesDateLabel"></span></h2>
+          <button class="btn-icon" id="closeNotes">✕</button>
+        </div>
         <div class="modal-body">
+          <textarea
+            class="notes-area"
+            id="notesText"
+            placeholder="How did today go? Any reflections..."
+          ></textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" id="cancelNotes">Close</button>
+          <button class="btn btn-primary" id="saveNotes">Save Notes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reminder Modal -->
+    <div class="modal-overlay" id="reminderModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Daily Reminder</h2>
+          <button class="btn-icon" id="closeReminder">✕</button>
+        </div>
+        <div class="modal-body">
+          <p
+            style="
+              color: var(--text-muted);
+              margin-bottom: 16px;
+              font-size: 0.9rem;
+            "
+          >
+            Get a browser notification every day at your chosen time. Works only
+            while this page is open or if you grant notification permission.
+          </p>
           <div class="form-group">
-            <label>Habit name</label>
-            <input type="text" id="hName" required maxlength="60" placeholder="e.g. Reading The Bible" />
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Category / Tag</label>
-              <input type="text" id="hCategory" placeholder="Spiritual, Health..." list="catList" />
-              <datalist id="catList"></datalist>
-            </div>
-            <div class="form-group">
-              <label>Type</label>
-              <select id="hType">
-                <option value="boolean">Simple check-off</option>
-                <option value="count">Count / Quantity</option>
-                <option value="duration">Time (minutes)</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row" id="targetRow" style="display:none;">
-            <div class="form-group">
-              <label>Daily target</label>
-              <input type="number" id="hTarget" min="1" value="1" />
-            </div>
-            <div class="form-group">
-              <label>Unit</label>
-              <input type="text" id="hUnit" placeholder="pages, glasses, min..." />
-            </div>
+            <label>Reminder time</label>
+            <input type="time" id="reminderTime" value="09:00" />
           </div>
           <div class="form-group">
-            <label>Color</label>
-            <div class="color-options" id="colorOptions">
-              <div class="color-swatch selected" data-color="#5b8def" style="background:#5b8def"></div>
-              <div class="color-swatch" data-color="#34d399" style="background:#34d399"></div>
-              <div class="color-swatch" data-color="#fbbf24" style="background:#fbbf24"></div>
-              <div class="color-swatch" data-color="#f87171" style="background:#f87171"></div>
-              <div class="color-swatch" data-color="#a78bfa" style="background:#a78bfa"></div>
-              <div class="color-swatch" data-color="#f472b6" style="background:#f472b6"></div>
-              <div class="color-swatch" data-color="#fb923c" style="background:#fb923c"></div>
-              <div class="color-swatch" data-color="#38bdf8" style="background:#38bdf8"></div>
-            </div>
+            <label>
+              <input
+                type="checkbox"
+                id="reminderEnabled"
+                style="width: auto; margin-right: 8px"
+              />
+              Enable daily reminder
+            </label>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-ghost" id="cancelModal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Habit</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Notes Modal -->
-  <div class="modal-overlay" id="notesModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h2>Daily Notes — <span id="notesDateLabel"></span></h2>
-        <button class="btn-icon" id="closeNotes">✕</button>
-      </div>
-      <div class="modal-body">
-        <textarea class="notes-area" id="notesText" placeholder="How did today go? Any reflections..."></textarea>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-ghost" id="cancelNotes">Close</button>
-        <button class="btn btn-primary" id="saveNotes">Save Notes</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Reminder Modal -->
-  <div class="modal-overlay" id="reminderModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h2>Daily Reminder</h2>
-        <button class="btn-icon" id="closeReminder">✕</button>
-      </div>
-      <div class="modal-body">
-        <p style="color:var(--text-muted); margin-bottom:16px; font-size:0.9rem;">
-          Get a browser notification every day at your chosen time. Works only while this page is open or if you grant notification permission.
-        </p>
-        <div class="form-group">
-          <label>Reminder time</label>
-          <input type="time" id="reminderTime" value="09:00" />
-        </div>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" id="reminderEnabled" style="width:auto; margin-right:8px;" />
-            Enable daily reminder
-          </label>
+          <button class="btn btn-ghost" id="cancelReminder">Cancel</button>
+          <button class="btn btn-primary" id="saveReminder">Save</button>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-ghost" id="cancelReminder">Cancel</button>
-        <button class="btn btn-primary" id="saveReminder">Save</button>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal-overlay" id="exportModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Export Data</h2>
+          <button class="btn-icon" id="closeExport">✕</button>
+        </div>
+        <div class="modal-body">
+          <p style="color: var(--text-muted); margin-bottom: 18px">
+            Download your habits and history.
+          </p>
+          <button
+            class="btn btn-primary"
+            id="exportCSV"
+            style="width: 100%; margin-bottom: 10px; justify-content: center"
+          >
+            Download CSV
+          </button>
+          <button
+            class="btn btn-ghost"
+            id="exportPDF"
+            style="width: 100%; justify-content: center"
+          >
+            Print / Save as PDF
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Export Modal -->
-  <div class="modal-overlay" id="exportModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h2>Export Data</h2>
-        <button class="btn-icon" id="closeExport">✕</button>
-      </div>
-      <div class="modal-body">
-        <p style="color:var(--text-muted); margin-bottom:18px;">Download your habits and history.</p>
-        <button class="btn btn-primary" id="exportCSV" style="width:100%; margin-bottom:10px; justify-content:center;">Download CSV</button>
-        <button class="btn btn-ghost" id="exportPDF" style="width:100%; justify-content:center;">Print / Save as PDF</button>
-      </div>
-    </div>
-  </div>
+    <div class="toast" id="toast"></div>
 
-  <div class="toast" id="toast"></div>
+    <script>
+      // ===================== STATE =====================
+      const STORAGE_KEY = "habitdash-v2";
+      // ===================== SUPABASE CONNECTION =====================
+      const SUPABASE_URL = "https://dbkmtskzxdhskfyyrfph.supabase.co";
 
-  <script>
-    // ===================== STATE =====================
-    const STORAGE_KEY = 'habitdash-v2';
-    let state = {
-      habits: [],
-      notes: {},
-      settings: {
-        theme: 'dark',
-        reminderTime: '09:00',
-        reminderEnabled: false
+      const SUPABASE_PUBLISHABLE_KEY =
+        "sb_publishable_5mNJ4vNp1nt-mZiFgHCc4A_WgShJgwC";
+
+      const supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY,
+      );
+      let state = {
+        habits: [],
+        notes: {},
+        settings: {
+          theme: "dark",
+          reminderTime: "09:00",
+          reminderEnabled: false,
+        },
+      };
+      let currentView = "today";
+      let viewDate = new Date(); // reference date for navigation
+      let editingId = null;
+      let selectedColor = "#5b8def";
+      let charts = {};
+
+      // ===================== HELPERS =====================
+      function iso(d) {
+        const x = new Date(d);
+        return (
+          x.getFullYear() +
+          "-" +
+          String(x.getMonth() + 1).padStart(2, "0") +
+          "-" +
+          String(x.getDate()).padStart(2, "0")
+        );
       }
-    };
-    let currentView = 'today';
-    let viewDate = new Date(); // reference date for navigation
-    let editingId = null;
-    let selectedColor = '#5b8def';
-    let charts = {};
-
-    // ===================== HELPERS =====================
-    function iso(d) {
-      const x = new Date(d);
-      return x.getFullYear() + '-' + String(x.getMonth()+1).padStart(2,'0') + '-' + String(x.getDate()).padStart(2,'0');
-    }
-    function todayISO() { return iso(new Date()); }
-    function parseISO(s) {
-      const [y,m,d] = s.split('-').map(Number);
-      return new Date(y, m-1, d);
-    }
-    function addDays(d, n) {
-      const x = new Date(d);
-      x.setDate(x.getDate() + n);
-      return x;
-    }
-    function startOfWeek(d) {
-      const x = new Date(d);
-      const day = x.getDay();
-      const diff = x.getDate() - day + (day === 0 ? -6 : 1);
-      x.setDate(diff);
-      x.setHours(0,0,0,0);
-      return x;
-    }
-    function startOfMonth(d) {
-      return new Date(d.getFullYear(), d.getMonth(), 1);
-    }
-    function daysInMonth(d) {
-      return new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
-    }
-    function formatDisplay(d) {
-      return d.toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric', year:'numeric' });
-    }
-    function formatMonth(d) {
-      return d.toLocaleDateString(undefined, { month:'long', year:'numeric' });
-    }
-    function escapeHtml(s) {
-      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-    function toast(msg) {
-      const el = document.getElementById('toast');
-      el.textContent = msg;
-      el.classList.add('show');
-      setTimeout(() => el.classList.remove('show'), 2200);
-    }
-    function uid() {
-      return crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
-    }
-
-    // ===================== PERSISTENCE =====================
-    function load() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          state = { ...state, ...parsed };
-        }
-      } catch(e) {}
-      // Preload default if empty
-      if (state.habits.length === 0) {
-        state.habits.push({
-          id: uid(),
-          name: 'Reading The Bible',
-          category: 'Spiritual',
-          color: '#5b8def',
-          type: 'boolean',
-          target: 1,
-          unit: '',
-          completed: {},
-          created: todayISO()
+      function todayISO() {
+        return iso(new Date());
+      }
+      function parseISO(s) {
+        const [y, m, d] = s.split("-").map(Number);
+        return new Date(y, m - 1, d);
+      }
+      function addDays(d, n) {
+        const x = new Date(d);
+        x.setDate(x.getDate() + n);
+        return x;
+      }
+      function startOfWeek(d) {
+        const x = new Date(d);
+        const day = x.getDay();
+        const diff = x.getDate() - day + (day === 0 ? -6 : 1);
+        x.setDate(diff);
+        x.setHours(0, 0, 0, 0);
+        return x;
+      }
+      function startOfMonth(d) {
+        return new Date(d.getFullYear(), d.getMonth(), 1);
+      }
+      function daysInMonth(d) {
+        return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+      }
+      function formatDisplay(d) {
+        return d.toLocaleDateString(undefined, {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+          year: "numeric",
         });
+      }
+      function formatMonth(d) {
+        return d.toLocaleDateString(undefined, {
+          month: "long",
+          year: "numeric",
+        });
+      }
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+      function toast(msg) {
+        const el = document.getElementById("toast");
+        el.textContent = msg;
+        el.classList.add("show");
+        setTimeout(() => el.classList.remove("show"), 2200);
+      }
+      function uid() {
+        return crypto.randomUUID
+          ? crypto.randomUUID()
+          : Date.now().toString(36) + Math.random().toString(36).slice(2);
+      }
+
+      // ===================== PERSISTENCE =====================
+      function load() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            state = { ...state, ...parsed };
+          }
+        } catch (e) {}
+        // Preload default if empty
+        if (state.habits.length === 0) {
+          state.habits.push({
+            id: uid(),
+            name: "Reading The Bible",
+            category: "Spiritual",
+            color: "#5b8def",
+            type: "boolean",
+            target: 1,
+            unit: "",
+            completed: {},
+            created: todayISO(),
+          });
+          save();
+        }
+        applyTheme(state.settings.theme || "dark");
+      }
+      function save() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        scheduleCloudSync();
+      }
+      async function loadFromCloud() {
+        if (!currentUser) return;
+
+        isLoadingCloudData = true;
+
+        try {
+          const { data, error } = await supabaseClient
+            .from("user_habit_data")
+            .select("data, updated_at")
+            .eq("user_id", currentUser.id)
+            .maybeSingle();
+
+          if (error) throw error;
+
+          if (data && data.data) {
+            state = { ...state, ...data.data };
+
+            lastCloudUpdate = new Date(data.updated_at).getTime();
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            applyTheme(state.settings.theme || "dark");
+            render();
+
+            console.log("Cloud habit data loaded successfully.");
+          } else {
+            console.log("No cloud data found. Uploading existing local data.");
+
+            const uploadTime = new Date().toISOString();
+
+            const { error: uploadError } = await supabaseClient
+              .from("user_habit_data")
+              .upsert({
+                user_id: currentUser.id,
+                data: state,
+                updated_at: uploadTime,
+              });
+
+            if (uploadError) throw uploadError;
+
+            lastCloudUpdate = new Date(uploadTime).getTime();
+
+            console.log("Existing local habit data uploaded successfully.");
+          }
+        } catch (error) {
+          console.error("Cloud loading failed:", error.message);
+        } finally {
+          isLoadingCloudData = false;
+        }
+      }
+      // ===================== AUTOMATIC CROSS-DEVICE SYNC =====================
+
+      let lastCloudUpdate = null;
+      let cloudCheckTimer = null;
+
+      async function checkCloudUpdates() {
+        if (!currentUser || isLoadingCloudData) return;
+
+        try {
+          const { data, error } = await supabaseClient
+            .from("user_habit_data")
+            .select("data, updated_at")
+            .eq("user_id", currentUser.id)
+            .maybeSingle();
+
+          if (error) throw error;
+          if (!data) return;
+
+          const cloudTime = new Date(data.updated_at).getTime();
+
+          if (lastCloudUpdate && cloudTime > lastCloudUpdate) {
+            isLoadingCloudData = true;
+
+            state = { ...state, ...data.data };
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
+            applyTheme(state.settings.theme || "dark");
+            render();
+
+            console.log("New changes received from cloud.");
+          }
+
+          lastCloudUpdate = cloudTime;
+        } catch (error) {
+          console.error("Cloud update check failed:", error.message);
+        } finally {
+          isLoadingCloudData = false;
+        }
+      }
+
+      function startCloudChecking() {
+        clearInterval(cloudCheckTimer);
+
+        cloudCheckTimer = setInterval(() => {
+          checkCloudUpdates();
+        }, 10000);
+      }
+
+      // ===================== ACCOUNT AUTHENTICATION =====================
+
+      function showAccountMessage(message, isError = false) {
+        const element = document.getElementById("accountMessage");
+        element.textContent = message;
+        element.style.color = isError ? "#ef4444" : "#22c55e";
+      }
+
+      function updateAccountUI(user) {
+        const status = document.getElementById("accountStatus");
+
+        if (user) {
+          status.textContent = "Signed in: " + user.email;
+          document.getElementById("accountEmail").style.display = "none";
+          document.getElementById("accountPassword").style.display = "none";
+          document.getElementById("accountLogin").style.display = "none";
+          document.getElementById("accountSignup").style.display = "none";
+          document.getElementById("accountLogout").style.display = "block";
+        } else {
+          status.textContent = "Not signed in";
+          document.getElementById("accountEmail").style.display = "block";
+          document.getElementById("accountPassword").style.display = "block";
+          document.getElementById("accountLogin").style.display = "block";
+          document.getElementById("accountSignup").style.display = "block";
+          document.getElementById("accountLogout").style.display = "none";
+        }
+      }
+
+      async function registerAccount() {
+        const email = document.getElementById("accountEmail").value.trim();
+        const password = document.getElementById("accountPassword").value;
+
+        if (!email || !password) {
+          showAccountMessage("Enter your email and password.", true);
+          return;
+        }
+
+        const { data, error } = await supabaseClient.auth.signUp({
+          email,
+          password,
+        });
+
+        if (error) {
+          showAccountMessage(error.message, true);
+          return;
+        }
+
+        if (data.session) {
+          showAccountMessage("Account created successfully.");
+        } else {
+          showAccountMessage(
+            "Account created. Check your email to confirm registration.",
+          );
+        }
+      }
+
+      async function loginAccount() {
+        const email = document.getElementById("accountEmail").value.trim();
+        const password = document.getElementById("accountPassword").value;
+
+        if (!email || !password) {
+          showAccountMessage("Enter your email and password.", true);
+          return;
+        }
+
+        const { error } = await supabaseClient.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) {
+          showAccountMessage(error.message, true);
+        } else {
+          showAccountMessage("Signing in...");
+        }
+      }
+
+      async function logoutAccount() {
+        const { error } = await supabaseClient.auth.signOut();
+
+        if (error) {
+          showAccountMessage(error.message, true);
+        } else {
+          currentUser = null;
+          updateAccountUI(null);
+          showAccountMessage("Signed out successfully.");
+        }
+      }
+
+      // ===================== ACCOUNT BUTTON EVENTS =====================
+
+      document
+        .getElementById("accountSignup")
+        .addEventListener("click", registerAccount);
+
+      document
+        .getElementById("accountLogin")
+        .addEventListener("click", loginAccount);
+
+      document
+        .getElementById("accountLogout")
+        .addEventListener("click", logoutAccount);
+
+      // ===================== SUPABASE SESSION MANAGEMENT =====================
+
+      supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (session && (event === "INITIAL_SESSION" || event === "SIGNED_IN")) {
+          currentUser = session.user;
+          updateAccountUI(currentUser);
+
+          setTimeout(async () => {
+            await loadFromCloud();
+            if (currentUser && currentUser.id === session.user.id) {
+              startCloudChecking();
+            }
+          }, 0);
+        }
+
+        if (event === "SIGNED_OUT") {
+          currentUser = null;
+          clearTimeout(cloudSyncTimer);
+
+          state = {
+            habits: [],
+            notes: {},
+            settings: {
+              theme: "dark",
+              reminderTime: "09:00",
+              reminderEnabled: false,
+            },
+          };
+
+          localStorage.removeItem(STORAGE_KEY);
+          updateAccountUI(null);
+          applyTheme("dark");
+          render();
+        }
+      });
+
+      // ===================== CLOUD SYNC =====================
+      let currentUser = null;
+      let cloudSyncTimer = null;
+      let isLoadingCloudData = false;
+
+      async function syncToCloud() {
+        if (!currentUser || isLoadingCloudData) return;
+
+        const updatedAt = new Date().toISOString();
+
+        const { error } = await supabaseClient.from("user_habit_data").upsert({
+          user_id: currentUser.id,
+          data: state,
+          updated_at: updatedAt,
+        });
+
+        if (error) {
+          console.error("Cloud sync failed:", error.message);
+        } else {
+          lastCloudUpdate = new Date(updatedAt).getTime();
+          console.log("Habit data synced successfully.");
+        }
+      }
+
+      function scheduleCloudSync() {
+        if (!currentUser || isLoadingCloudData) return;
+
+        clearTimeout(cloudSyncTimer);
+
+        cloudSyncTimer = setTimeout(() => {
+          syncToCloud();
+        }, 1500);
+      }
+      // ===================== STREAK & PROGRESS =====================
+      function isDone(habit, dateStr) {
+        const val = habit.completed[dateStr];
+        if (val === undefined || val === null || val === false || val === 0)
+          return false;
+        if (habit.type === "boolean") return !!val;
+        return Number(val) >= (habit.target || 1);
+      }
+      function getValue(habit, dateStr) {
+        return habit.completed[dateStr] || 0;
+      }
+      function calcStreak(habit) {
+        let streak = 0;
+        let d = new Date();
+        // If today not done, start counting from yesterday
+        if (!isDone(habit, iso(d))) d = addDays(d, -1);
+        while (isDone(habit, iso(d))) {
+          streak++;
+          d = addDays(d, -1);
+        }
+        return streak;
+      }
+      function calcBestStreak(habit) {
+        const dates = Object.keys(habit.completed)
+          .filter((k) => isDone(habit, k))
+          .sort();
+        if (dates.length === 0) return 0;
+        let best = 1,
+          cur = 1;
+        for (let i = 1; i < dates.length; i++) {
+          const prev = parseISO(dates[i - 1]);
+          const curr = parseISO(dates[i]);
+          const diff = (curr - prev) / 86400000;
+          if (diff === 1) {
+            cur++;
+            best = Math.max(best, cur);
+          } else if (diff > 1) cur = 1;
+        }
+        return best;
+      }
+      function completionRate(habit, days = 30) {
+        let done = 0,
+          total = 0;
+        let d = new Date();
+        for (let i = 0; i < days; i++) {
+          const s = iso(d);
+          if (s >= habit.created) {
+            total++;
+            if (isDone(habit, s)) done++;
+          }
+          d = addDays(d, -1);
+        }
+        return total ? Math.round((done / total) * 100) : 0;
+      }
+
+      // ===================== THEME =====================
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        state.settings.theme = theme;
+        document.getElementById("themeIcon").textContent =
+          theme === "dark" ? "☾" : "☀";
+        document.getElementById("themeLabel").textContent =
+          theme === "dark" ? "Dark" : "Light";
         save();
       }
-      applyTheme(state.settings.theme || 'dark');
-    }
-    function save() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }
 
-    // ===================== STREAK & PROGRESS =====================
-    function isDone(habit, dateStr) {
-      const val = habit.completed[dateStr];
-      if (val === undefined || val === null || val === false || val === 0) return false;
-      if (habit.type === 'boolean') return !!val;
-      return Number(val) >= (habit.target || 1);
-    }
-    function getValue(habit, dateStr) {
-      return habit.completed[dateStr] || 0;
-    }
-    function calcStreak(habit) {
-      let streak = 0;
-      let d = new Date();
-      // If today not done, start counting from yesterday
-      if (!isDone(habit, iso(d))) d = addDays(d, -1);
-      while (isDone(habit, iso(d))) {
-        streak++;
-        d = addDays(d, -1);
+      // ===================== RENDER =====================
+      function setView(view) {
+        currentView = view;
+        document.querySelectorAll(".nav-item[data-view]").forEach((el) => {
+          el.classList.toggle("active", el.dataset.view === view);
+        });
+        const titles = {
+          today: "Today",
+          week: "This Week",
+          month: "Month",
+          analytics: "Analytics",
+          habits: "All Habits",
+        };
+        document.getElementById("pageTitle").textContent = titles[view] || view;
+        document.getElementById("dateNav").style.display =
+          view === "analytics" || view === "habits" ? "none" : "flex";
+        updateDateLabel();
+        render();
+        // close mobile sidebar
+        document.getElementById("sidebar").classList.remove("open");
+        document.getElementById("mobileOverlay").classList.remove("show");
       }
-      return streak;
-    }
-    function calcBestStreak(habit) {
-      const dates = Object.keys(habit.completed)
-        .filter(k => isDone(habit, k))
-        .sort();
-      if (dates.length === 0) return 0;
-      let best = 1, cur = 1;
-      for (let i = 1; i < dates.length; i++) {
-        const prev = parseISO(dates[i-1]);
-        const curr = parseISO(dates[i]);
-        const diff = (curr - prev) / 86400000;
-        if (diff === 1) { cur++; best = Math.max(best, cur); }
-        else if (diff > 1) cur = 1;
-      }
-      return best;
-    }
-    function completionRate(habit, days = 30) {
-      let done = 0, total = 0;
-      let d = new Date();
-      for (let i = 0; i < days; i++) {
-        const s = iso(d);
-        if (s >= habit.created) {
-          total++;
-          if (isDone(habit, s)) done++;
+
+      function updateDateLabel() {
+        const el = document.getElementById("currentDateLabel");
+        if (currentView === "today") el.textContent = formatDisplay(viewDate);
+        else if (currentView === "week") {
+          const mon = startOfWeek(viewDate);
+          const sun = addDays(mon, 6);
+          el.textContent =
+            mon.toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+            }) +
+            " – " +
+            sun.toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+            });
+        } else if (currentView === "month") {
+          el.textContent = formatMonth(viewDate);
         }
-        d = addDays(d, -1);
       }
-      return total ? Math.round((done / total) * 100) : 0;
-    }
 
-    // ===================== THEME =====================
-    function applyTheme(theme) {
-      document.documentElement.setAttribute('data-theme', theme);
-      state.settings.theme = theme;
-      document.getElementById('themeIcon').textContent = theme === 'dark' ? '☾' : '☀';
-      document.getElementById('themeLabel').textContent = theme === 'dark' ? 'Dark' : 'Light';
-      save();
-    }
+      function render() {
+        const content = document.getElementById("content");
+        if (currentView === "today") content.innerHTML = renderToday();
+        else if (currentView === "week") content.innerHTML = renderWeek();
+        else if (currentView === "month") content.innerHTML = renderMonth();
+        else if (currentView === "analytics")
+          content.innerHTML = renderAnalytics();
+        else if (currentView === "habits")
+          content.innerHTML = renderHabitsList();
 
-    // ===================== RENDER =====================
-    function setView(view) {
-      currentView = view;
-      document.querySelectorAll('.nav-item[data-view]').forEach(el => {
-        el.classList.toggle('active', el.dataset.view === view);
-      });
-      const titles = { today:'Today', week:'This Week', month:'Month', analytics:'Analytics', habits:'All Habits' };
-      document.getElementById('pageTitle').textContent = titles[view] || view;
-      document.getElementById('dateNav').style.display = (view === 'analytics' || view === 'habits') ? 'none' : 'flex';
-      updateDateLabel();
-      render();
-      // close mobile sidebar
-      document.getElementById('sidebar').classList.remove('open');
-      document.getElementById('mobileOverlay').classList.remove('show');
-    }
-
-    function updateDateLabel() {
-      const el = document.getElementById('currentDateLabel');
-      if (currentView === 'today') el.textContent = formatDisplay(viewDate);
-      else if (currentView === 'week') {
-        const mon = startOfWeek(viewDate);
-        const sun = addDays(mon, 6);
-        el.textContent = mon.toLocaleDateString(undefined,{month:'short',day:'numeric'}) + ' – ' + sun.toLocaleDateString(undefined,{month:'short',day:'numeric'});
-      } else if (currentView === 'month') {
-        el.textContent = formatMonth(viewDate);
+        // re-bind after innerHTML
+        bindDynamicEvents();
+        if (currentView === "analytics") initCharts();
       }
-    }
 
-    function render() {
-      const content = document.getElementById('content');
-      if (currentView === 'today') content.innerHTML = renderToday();
-      else if (currentView === 'week') content.innerHTML = renderWeek();
-      else if (currentView === 'month') content.innerHTML = renderMonth();
-      else if (currentView === 'analytics') content.innerHTML = renderAnalytics();
-      else if (currentView === 'habits') content.innerHTML = renderHabitsList();
+      function renderStats() {
+        const active = state.habits.filter((h) => !h.archived);
+        const t = todayISO();
+        let doneToday = 0;
+        let bestStreak = 0;
+        active.forEach((h) => {
+          if (isDone(h, t)) doneToday++;
+          bestStreak = Math.max(bestStreak, calcStreak(h));
+        });
+        const rate = active.length
+          ? Math.round((doneToday / active.length) * 100)
+          : 0;
 
-      // re-bind after innerHTML
-      bindDynamicEvents();
-      if (currentView === 'analytics') initCharts();
-    }
-
-    function renderStats() {
-      const active = state.habits.filter(h => !h.archived);
-      const t = todayISO();
-      let doneToday = 0;
-      let bestStreak = 0;
-      active.forEach(h => {
-        if (isDone(h, t)) doneToday++;
-        bestStreak = Math.max(bestStreak, calcStreak(h));
-      });
-      const rate = active.length ? Math.round((doneToday / active.length) * 100) : 0;
-
-      return `
+        return `
         <div class="stats-row">
           <div class="stat-card">
             <div class="stat-label">Active Habits</div>
@@ -1070,29 +1723,37 @@
           </div>
         </div>
       `;
-    }
-
-    function renderToday() {
-      const dateStr = iso(viewDate);
-      const active = state.habits.filter(h => !h.archived);
-      if (active.length === 0) {
-        return renderStats() + `<div class="empty"><h3>No habits yet</h3><p>Add your first habit to start tracking.</p></div>`;
       }
 
-      let html = renderStats();
-      html += `<div class="habit-list">`;
-      active.forEach(h => {
-        const done = isDone(h, dateStr);
-        const val = getValue(h, dateStr);
-        const streak = calcStreak(h);
-        const rate = completionRate(h, 30);
-        const target = h.target || 1;
-        const progress = h.type === 'boolean' ? (done ? 100 : 0) : Math.min(100, Math.round((val / target) * 100));
+      function renderToday() {
+        const dateStr = iso(viewDate);
+        const active = state.habits.filter((h) => !h.archived);
+        if (active.length === 0) {
+          return (
+            renderStats() +
+            `<div class="empty"><h3>No habits yet</h3><p>Add your first habit to start tracking.</p></div>`
+          );
+        }
 
-        html += `
+        let html = renderStats();
+        html += `<div class="habit-list">`;
+        active.forEach((h) => {
+          const done = isDone(h, dateStr);
+          const val = getValue(h, dateStr);
+          const streak = calcStreak(h);
+          const rate = completionRate(h, 30);
+          const target = h.target || 1;
+          const progress =
+            h.type === "boolean"
+              ? done
+                ? 100
+                : 0
+              : Math.min(100, Math.round((val / target) * 100));
+
+          html += `
           <div class="habit-item" data-id="${h.id}">
-            <div class="habit-check ${done ? 'done' : ''}" data-action="toggle" data-id="${h.id}" data-date="${dateStr}">
-              ${done ? '✓' : ''}
+            <div class="habit-check ${done ? "done" : ""}" data-action="toggle" data-id="${h.id}" data-date="${dateStr}">
+              ${done ? "✓" : ""}
             </div>
             <div class="habit-info">
               <h3>
@@ -1100,7 +1761,7 @@
                 ${escapeHtml(h.name)}
               </h3>
               <div class="habit-meta">
-                ${h.category ? `<span class="tag">${escapeHtml(h.category)}</span>` : ''}
+                ${h.category ? `<span class="tag">${escapeHtml(h.category)}</span>` : ""}
                 <span class="streak-badge">🔥 ${streak} day streak</span>
                 <span>Best: ${calcBestStreak(h)}</span>
                 <span>${rate}% (30d)</span>
@@ -1110,116 +1771,130 @@
               </div>
             </div>
             <div class="habit-actions">
-              ${h.type !== 'boolean' ? `
+              ${
+                h.type !== "boolean"
+                  ? `
                 <div class="count-controls">
                   <button class="count-btn" data-action="dec" data-id="${h.id}" data-date="${dateStr}">−</button>
-                  <span class="count-value">${val}${h.unit ? ' ' + escapeHtml(h.unit) : ''} / ${target}</span>
+                  <span class="count-value">${val}${h.unit ? " " + escapeHtml(h.unit) : ""} / ${target}</span>
                   <button class="count-btn" data-action="inc" data-id="${h.id}" data-date="${dateStr}">+</button>
                 </div>
-              ` : ''}
+              `
+                  : ""
+              }
             </div>
           </div>
         `;
-      });
-      html += `</div>`;
+        });
+        html += `</div>`;
 
-      // Quick notes
-      const note = state.notes[dateStr] || '';
-      html += `
+        // Quick notes
+        const note = state.notes[dateStr] || "";
+        html += `
         <div class="card" style="margin-top:20px;">
           <div class="card-header">
             <span class="card-title">Daily Notes</span>
             <button class="btn btn-ghost btn-sm" id="openNotesBtn">Edit</button>
           </div>
-          <div style="color:var(--text-muted); white-space:pre-wrap; min-height:40px;">${note ? escapeHtml(note) : '<em>No notes for this day yet.</em>'}</div>
+          <div style="color:var(--text-muted); white-space:pre-wrap; min-height:40px;">${note ? escapeHtml(note) : "<em>No notes for this day yet.</em>"}</div>
         </div>
       `;
-      return html;
-    }
-
-    function renderWeek() {
-      const mon = startOfWeek(viewDate);
-      const days = Array.from({length:7}, (_,i) => addDays(mon, i));
-      const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-      const today = todayISO();
-      const active = state.habits.filter(h => !h.archived);
-
-      let html = renderStats();
-      html += `<div class="card"><div class="week-header"><span></span>${days.map((d,i) => `<span>${dayNames[i]}<br>${d.getDate()}</span>`).join('')}</div>`;
-
-      if (active.length === 0) {
-        html += `<div class="empty"><h3>No habits</h3></div></div>`;
         return html;
       }
 
-      active.forEach(h => {
-        html += `<div class="habit-row">
+      function renderWeek() {
+        const mon = startOfWeek(viewDate);
+        const days = Array.from({ length: 7 }, (_, i) => addDays(mon, i));
+        const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+        const today = todayISO();
+        const active = state.habits.filter((h) => !h.archived);
+
+        let html = renderStats();
+        html += `<div class="card"><div class="week-header"><span></span>${days.map((d, i) => `<span>${dayNames[i]}<br>${d.getDate()}</span>`).join("")}</div>`;
+
+        if (active.length === 0) {
+          html += `<div class="empty"><h3>No habits</h3></div></div>`;
+          return html;
+        }
+
+        active.forEach((h) => {
+          html += `<div class="habit-row">
           <div class="habit-row-name"><span class="cat-dot" style="background:${h.color}"></span>${escapeHtml(h.name)}</div>`;
-        days.forEach(d => {
-          const s = iso(d);
-          const done = isDone(h, s);
-          const val = getValue(h, s);
-          const future = s > today;
-          let cls = 'day-cell';
-          if (done) cls += ' done';
-          else if (h.type !== 'boolean' && val > 0) cls += ' partial';
-          if (s === today) cls += ' today';
-          if (future) cls += ' future';
-          html += `<div class="${cls}" data-action="toggle" data-id="${h.id}" data-date="${s}" title="${s}">${done ? '✓' : (val || '')}</div>`;
+          days.forEach((d) => {
+            const s = iso(d);
+            const done = isDone(h, s);
+            const val = getValue(h, s);
+            const future = s > today;
+            let cls = "day-cell";
+            if (done) cls += " done";
+            else if (h.type !== "boolean" && val > 0) cls += " partial";
+            if (s === today) cls += " today";
+            if (future) cls += " future";
+            html += `<div class="${cls}" data-action="toggle" data-id="${h.id}" data-date="${s}" title="${s}">${done ? "✓" : val || ""}</div>`;
+          });
+          html += `</div>`;
         });
         html += `</div>`;
-      });
-      html += `</div>`;
-      return html;
-    }
+        return html;
+      }
 
-    function renderMonth() {
-      const start = startOfMonth(viewDate);
-      const totalDays = daysInMonth(viewDate);
-      const firstDow = (start.getDay() + 6) % 7; // Mon=0
-      const today = todayISO();
-      const active = state.habits.filter(h => !h.archived);
+      function renderMonth() {
+        const start = startOfMonth(viewDate);
+        const totalDays = daysInMonth(viewDate);
+        const firstDow = (start.getDay() + 6) % 7; // Mon=0
+        const today = todayISO();
+        const active = state.habits.filter((h) => !h.archived);
 
-      let html = renderStats();
-      html += `<div class="card">
+        let html = renderStats();
+        html += `<div class="card">
         <div class="card-header"><span class="card-title">${formatMonth(viewDate)} — Overall completion</span></div>
-        <div class="month-header">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<span>${d}</span>`).join('')}</div>
+        <div class="month-header">${["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => `<span>${d}</span>`).join("")}</div>
         <div class="month-grid">`;
 
-      // empty cells
-      for (let i=0; i<firstDow; i++) {
-        html += `<div class="month-day other-month"></div>`;
-      }
-      for (let day=1; day<=totalDays; day++) {
-        const d = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
-        const s = iso(d);
-        let doneCount = 0;
-        active.forEach(h => { if (isDone(h, s)) doneCount++; });
-        const pct = active.length ? Math.round((doneCount / active.length) * 100) : 0;
-        let heat = 0;
-        if (pct >= 100) heat = 4;
-        else if (pct >= 75) heat = 3;
-        else if (pct >= 50) heat = 2;
-        else if (pct >= 25) heat = 1;
-        const isToday = s === today;
-        html += `<div class="month-day heat-${heat} ${isToday?'today':''}" data-date="${s}" title="${s}: ${pct}%">
+        // empty cells
+        for (let i = 0; i < firstDow; i++) {
+          html += `<div class="month-day other-month"></div>`;
+        }
+        for (let day = 1; day <= totalDays; day++) {
+          const d = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
+          const s = iso(d);
+          let doneCount = 0;
+          active.forEach((h) => {
+            if (isDone(h, s)) doneCount++;
+          });
+          const pct = active.length
+            ? Math.round((doneCount / active.length) * 100)
+            : 0;
+          let heat = 0;
+          if (pct >= 100) heat = 4;
+          else if (pct >= 75) heat = 3;
+          else if (pct >= 50) heat = 2;
+          else if (pct >= 25) heat = 1;
+          const isToday = s === today;
+          html += `<div class="month-day heat-${heat} ${isToday ? "today" : ""}" data-date="${s}" title="${s}: ${pct}%">
           <span>${day}</span>
           <span class="pct">${pct}%</span>
         </div>`;
-      }
-      html += `</div></div>`;
-
-      // Per-habit mini summary
-      html += `<div class="card" style="margin-top:16px;"><div class="card-title" style="margin-bottom:14px;">Habit performance this month</div>`;
-      active.forEach(h => {
-        let done = 0, total = 0;
-        for (let day=1; day<=totalDays; day++) {
-          const s = iso(new Date(viewDate.getFullYear(), viewDate.getMonth(), day));
-          if (s > today) break;
-          if (s >= h.created) { total++; if (isDone(h, s)) done++; }
         }
-        const pct = total ? Math.round((done/total)*100) : 0;
-        html += `
+        html += `</div></div>`;
+
+        // Per-habit mini summary
+        html += `<div class="card" style="margin-top:16px;"><div class="card-title" style="margin-bottom:14px;">Habit performance this month</div>`;
+        active.forEach((h) => {
+          let done = 0,
+            total = 0;
+          for (let day = 1; day <= totalDays; day++) {
+            const s = iso(
+              new Date(viewDate.getFullYear(), viewDate.getMonth(), day),
+            );
+            if (s > today) break;
+            if (s >= h.created) {
+              total++;
+              if (isDone(h, s)) done++;
+            }
+          }
+          const pct = total ? Math.round((done / total) * 100) : 0;
+          html += `
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
             <span class="cat-dot" style="background:${h.color}"></span>
             <span style="flex:1;font-weight:500;">${escapeHtml(h.name)}</span>
@@ -1229,15 +1904,15 @@
             </div>
             <span style="font-weight:600;min-width:40px;text-align:right;">${pct}%</span>
           </div>`;
-      });
-      html += `</div>`;
-      return html;
-    }
+        });
+        html += `</div>`;
+        return html;
+      }
 
-    function renderAnalytics() {
-      const active = state.habits.filter(h => !h.archived);
-      let html = renderStats();
-      html += `
+      function renderAnalytics() {
+        const active = state.habits.filter((h) => !h.archived);
+        let html = renderStats();
+        html += `
         <div class="charts-grid">
           <div class="chart-card">
             <h3>Completion last 14 days</h3>
@@ -1252,38 +1927,40 @@
           <div class="card-title" style="margin-bottom:14px;">Streak leaderboard</div>
           <div style="display:flex;flex-direction:column;gap:10px;">
       `;
-      const ranked = [...active].sort((a,b) => calcStreak(b) - calcStreak(a));
-      ranked.forEach((h, i) => {
-        html += `
+        const ranked = [...active].sort(
+          (a, b) => calcStreak(b) - calcStreak(a),
+        );
+        ranked.forEach((h, i) => {
+          html += `
           <div style="display:flex;align-items:center;gap:12px;">
-            <span style="width:24px;font-weight:700;color:var(--text-muted);">#${i+1}</span>
+            <span style="width:24px;font-weight:700;color:var(--text-muted);">#${i + 1}</span>
             <span class="cat-dot" style="background:${h.color}"></span>
             <span style="flex:1;font-weight:500;">${escapeHtml(h.name)}</span>
             <span class="streak-badge">🔥 ${calcStreak(h)}</span>
             <span style="color:var(--text-muted);font-size:0.85rem;">Best ${calcBestStreak(h)}</span>
           </div>`;
-      });
-      html += `</div></div>`;
-      return html;
-    }
-
-    function renderHabitsList() {
-      const active = state.habits.filter(h => !h.archived);
-      let html = `<div class="card"><div class="card-header"><span class="card-title">All Habits (${active.length})</span></div>`;
-      if (active.length === 0) {
-        html += `<div class="empty"><h3>No habits</h3><p>Click “+ Add Habit” to create one.</p></div></div>`;
+        });
+        html += `</div></div>`;
         return html;
       }
-      html += `<div class="habit-list">`;
-      active.forEach(h => {
-        html += `
+
+      function renderHabitsList() {
+        const active = state.habits.filter((h) => !h.archived);
+        let html = `<div class="card"><div class="card-header"><span class="card-title">All Habits (${active.length})</span></div>`;
+        if (active.length === 0) {
+          html += `<div class="empty"><h3>No habits</h3><p>Click “+ Add Habit” to create one.</p></div></div>`;
+          return html;
+        }
+        html += `<div class="habit-list">`;
+        active.forEach((h) => {
+          html += `
           <div class="habit-item">
             <span class="cat-dot" style="background:${h.color};width:12px;height:12px;"></span>
             <div class="habit-info">
               <h3>${escapeHtml(h.name)}</h3>
               <div class="habit-meta">
-                ${h.category ? `<span class="tag">${escapeHtml(h.category)}</span>` : ''}
-                <span>${h.type === 'boolean' ? 'Check-off' : h.type === 'count' ? `Count (target ${h.target} ${h.unit||''})` : `Time (target ${h.target} min)`}</span>
+                ${h.category ? `<span class="tag">${escapeHtml(h.category)}</span>` : ""}
+                <span>${h.type === "boolean" ? "Check-off" : h.type === "count" ? `Count (target ${h.target} ${h.unit || ""})` : `Time (target ${h.target} min)`}</span>
                 <span class="streak-badge">🔥 ${calcStreak(h)}</span>
                 <span>Best: ${calcBestStreak(h)}</span>
               </div>
@@ -1293,346 +1970,431 @@
               <button class="btn btn-danger btn-sm" data-action="delete" data-id="${h.id}">Delete</button>
             </div>
           </div>`;
-      });
-      html += `</div></div>`;
-      return html;
-    }
-
-    function initCharts() {
-      // destroy old
-      Object.values(charts).forEach(c => c.destroy());
-      charts = {};
-
-      const active = state.habits.filter(h => !h.archived);
-      const labels = [];
-      const data = [];
-      for (let i = 13; i >= 0; i--) {
-        const d = addDays(new Date(), -i);
-        const s = iso(d);
-        labels.push(d.toLocaleDateString(undefined, {month:'short', day:'numeric'}));
-        let done = 0;
-        active.forEach(h => { if (isDone(h, s)) done++; });
-        data.push(active.length ? Math.round((done / active.length) * 100) : 0);
-      }
-
-      const ctx1 = document.getElementById('chartTrend');
-      if (ctx1) {
-        charts.trend = new Chart(ctx1, {
-          type: 'line',
-          data: {
-            labels,
-            datasets: [{
-              label: 'Completion %',
-              data,
-              borderColor: '#5b8def',
-              backgroundColor: 'rgba(91,141,239,0.15)',
-              fill: true,
-              tension: 0.3,
-              pointRadius: 3
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              y: { min: 0, max: 100, ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted') }, grid: { color: 'rgba(128,128,128,0.1)' } },
-              x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted'), maxRotation: 45 }, grid: { display: false } }
-            }
-          }
         });
+        html += `</div></div>`;
+        return html;
       }
 
-      const ctx2 = document.getElementById('chartHabits');
-      if (ctx2 && active.length) {
-        charts.habits = new Chart(ctx2, {
-          type: 'bar',
-          data: {
-            labels: active.map(h => h.name.length > 14 ? h.name.slice(0,12)+'…' : h.name),
-            datasets: [{
-              label: '30-day rate',
-              data: active.map(h => completionRate(h, 30)),
-              backgroundColor: active.map(h => h.color),
-              borderRadius: 6
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              y: { min: 0, max: 100, ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted') }, grid: { color: 'rgba(128,128,128,0.1)' } },
-              x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted') }, grid: { display: false } }
-            }
-          }
-        });
-      }
-    }
+      function initCharts() {
+        // destroy old
+        Object.values(charts).forEach((c) => c.destroy());
+        charts = {};
 
-    // ===================== ACTIONS =====================
-    function toggleHabit(id, dateStr) {
-      const h = state.habits.find(x => x.id === id);
-      if (!h) return;
-      if (h.type === 'boolean') {
-        h.completed[dateStr] = !isDone(h, dateStr);
-      } else {
-        // for count/duration, toggle to target or 0
-        h.completed[dateStr] = isDone(h, dateStr) ? 0 : (h.target || 1);
-      }
-      save();
-      render();
-      toast(isDone(h, dateStr) ? 'Completed ✓' : 'Unmarked');
-    }
-    function changeCount(id, dateStr, delta) {
-      const h = state.habits.find(x => x.id === id);
-      if (!h) return;
-      let val = Number(h.completed[dateStr] || 0) + delta;
-      if (val < 0) val = 0;
-      h.completed[dateStr] = val;
-      save();
-      render();
-    }
-    function deleteHabit(id) {
-      if (!confirm('Delete this habit and all its history?')) return;
-      state.habits = state.habits.filter(h => h.id !== id);
-      save();
-      render();
-      toast('Habit deleted');
-    }
-
-    function openHabitModal(id = null) {
-      editingId = id;
-      selectedColor = '#5b8def';
-      document.getElementById('modalTitle').textContent = id ? 'Edit Habit' : 'Add Habit';
-      document.getElementById('habitForm').reset();
-      document.getElementById('targetRow').style.display = 'none';
-      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
-      document.querySelector('.color-swatch[data-color="#5b8def"]').classList.add('selected');
-
-      // categories datalist
-      const cats = [...new Set(state.habits.map(h => h.category).filter(Boolean))];
-      document.getElementById('catList').innerHTML = cats.map(c => `<option value="${escapeHtml(c)}">`).join('');
-
-      if (id) {
-        const h = state.habits.find(x => x.id === id);
-        if (h) {
-          document.getElementById('hName').value = h.name;
-          document.getElementById('hCategory').value = h.category || '';
-          document.getElementById('hType').value = h.type;
-          document.getElementById('hTarget').value = h.target || 1;
-          document.getElementById('hUnit').value = h.unit || '';
-          selectedColor = h.color;
-          document.querySelectorAll('.color-swatch').forEach(s => {
-            s.classList.toggle('selected', s.dataset.color === h.color);
+        const active = state.habits.filter((h) => !h.archived);
+        const labels = [];
+        const data = [];
+        for (let i = 13; i >= 0; i--) {
+          const d = addDays(new Date(), -i);
+          const s = iso(d);
+          labels.push(
+            d.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+          );
+          let done = 0;
+          active.forEach((h) => {
+            if (isDone(h, s)) done++;
           });
-          if (h.type !== 'boolean') document.getElementById('targetRow').style.display = 'grid';
+          data.push(
+            active.length ? Math.round((done / active.length) * 100) : 0,
+          );
         }
-      }
-      document.getElementById('habitModal').classList.add('open');
-    }
 
-    // ===================== BINDINGS =====================
-    function bindDynamicEvents() {
-      document.querySelectorAll('[data-action="toggle"]').forEach(el => {
-        el.onclick = () => toggleHabit(el.dataset.id, el.dataset.date);
-      });
-      document.querySelectorAll('[data-action="inc"]').forEach(el => {
-        el.onclick = () => changeCount(el.dataset.id, el.dataset.date, 1);
-      });
-      document.querySelectorAll('[data-action="dec"]').forEach(el => {
-        el.onclick = () => changeCount(el.dataset.id, el.dataset.date, -1);
-      });
-      document.querySelectorAll('[data-action="edit"]').forEach(el => {
-        el.onclick = () => openHabitModal(el.dataset.id);
-      });
-      document.querySelectorAll('[data-action="delete"]').forEach(el => {
-        el.onclick = () => deleteHabit(el.dataset.id);
-      });
-      const notesBtn = document.getElementById('openNotesBtn');
-      if (notesBtn) notesBtn.onclick = () => openNotes();
-    }
-
-    // Static event listeners
-    document.querySelectorAll('.nav-item[data-view]').forEach(el => {
-      el.addEventListener('click', () => setView(el.dataset.view));
-    });
-
-    document.getElementById('menuBtn').onclick = () => {
-      document.getElementById('sidebar').classList.toggle('open');
-      document.getElementById('mobileOverlay').classList.toggle('show');
-    };
-    document.getElementById('mobileOverlay').onclick = () => {
-      document.getElementById('sidebar').classList.remove('open');
-      document.getElementById('mobileOverlay').classList.remove('show');
-    };
-
-    document.getElementById('themeToggle').onclick = () => {
-      applyTheme(state.settings.theme === 'dark' ? 'light' : 'dark');
-      if (currentView === 'analytics') render();
-    };
-
-    document.getElementById('addHabitBtn').onclick = () => openHabitModal();
-    document.getElementById('closeModal').onclick = () => document.getElementById('habitModal').classList.remove('open');
-    document.getElementById('cancelModal').onclick = () => document.getElementById('habitModal').classList.remove('open');
-
-    document.getElementById('hType').onchange = (e) => {
-      document.getElementById('targetRow').style.display = e.target.value === 'boolean' ? 'none' : 'grid';
-    };
-    document.querySelectorAll('.color-swatch').forEach(s => {
-      s.onclick = () => {
-        document.querySelectorAll('.color-swatch').forEach(x => x.classList.remove('selected'));
-        s.classList.add('selected');
-        selectedColor = s.dataset.color;
-      };
-    });
-
-    document.getElementById('habitForm').onsubmit = (e) => {
-      e.preventDefault();
-      const name = document.getElementById('hName').value.trim();
-      if (!name) return;
-      const data = {
-        name,
-        category: document.getElementById('hCategory').value.trim(),
-        type: document.getElementById('hType').value,
-        target: Number(document.getElementById('hTarget').value) || 1,
-        unit: document.getElementById('hUnit').value.trim(),
-        color: selectedColor
-      };
-      if (editingId) {
-        const h = state.habits.find(x => x.id === editingId);
-        if (h) Object.assign(h, data);
-        toast('Habit updated');
-      } else {
-        state.habits.push({
-          id: uid(),
-          ...data,
-          completed: {},
-          created: todayISO()
-        });
-        toast('Habit added');
-      }
-      save();
-      document.getElementById('habitModal').classList.remove('open');
-      render();
-    };
-
-    // Date navigation
-    document.getElementById('prevDate').onclick = () => {
-      if (currentView === 'today') viewDate = addDays(viewDate, -1);
-      else if (currentView === 'week') viewDate = addDays(viewDate, -7);
-      else if (currentView === 'month') viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 1);
-      updateDateLabel();
-      render();
-    };
-    document.getElementById('nextDate').onclick = () => {
-      if (currentView === 'today') viewDate = addDays(viewDate, 1);
-      else if (currentView === 'week') viewDate = addDays(viewDate, 7);
-      else if (currentView === 'month') viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()+1, 1);
-      updateDateLabel();
-      render();
-    };
-    document.getElementById('todayJump').onclick = () => {
-      viewDate = new Date();
-      updateDateLabel();
-      render();
-    };
-
-    // Notes
-    function openNotes() {
-      const s = iso(viewDate);
-      document.getElementById('notesDateLabel').textContent = formatDisplay(viewDate);
-      document.getElementById('notesText').value = state.notes[s] || '';
-      document.getElementById('notesModal').classList.add('open');
-    }
-    document.getElementById('notesNavBtn').onclick = openNotes;
-    document.getElementById('closeNotes').onclick = () => document.getElementById('notesModal').classList.remove('open');
-    document.getElementById('cancelNotes').onclick = () => document.getElementById('notesModal').classList.remove('open');
-    document.getElementById('saveNotes').onclick = () => {
-      const s = iso(viewDate);
-      state.notes[s] = document.getElementById('notesText').value;
-      save();
-      document.getElementById('notesModal').classList.remove('open');
-      if (currentView === 'today') render();
-      toast('Notes saved');
-    };
-
-    // Reminders
-    document.getElementById('reminderBtn').onclick = () => {
-      document.getElementById('reminderTime').value = state.settings.reminderTime || '09:00';
-      document.getElementById('reminderEnabled').checked = !!state.settings.reminderEnabled;
-      document.getElementById('reminderModal').classList.add('open');
-    };
-    document.getElementById('closeReminder').onclick = () => document.getElementById('reminderModal').classList.remove('open');
-    document.getElementById('cancelReminder').onclick = () => document.getElementById('reminderModal').classList.remove('open');
-    document.getElementById('saveReminder').onclick = async () => {
-      state.settings.reminderTime = document.getElementById('reminderTime').value;
-      state.settings.reminderEnabled = document.getElementById('reminderEnabled').checked;
-      save();
-      if (state.settings.reminderEnabled && 'Notification' in window) {
-        if (Notification.permission === 'default') await Notification.requestPermission();
-        if (Notification.permission === 'granted') toast('Reminder enabled');
-        else toast('Please allow notifications in browser settings');
-      } else {
-        toast('Reminder settings saved');
-      }
-      document.getElementById('reminderModal').classList.remove('open');
-      scheduleReminder();
-    };
-
-    let reminderTimer = null;
-    function scheduleReminder() {
-      if (reminderTimer) clearTimeout(reminderTimer);
-      if (!state.settings.reminderEnabled) return;
-      const [hh, mm] = (state.settings.reminderTime || '09:00').split(':').map(Number);
-      const now = new Date();
-      let target = new Date();
-      target.setHours(hh, mm, 0, 0);
-      if (target <= now) target = addDays(target, 1);
-      const ms = target - now;
-      reminderTimer = setTimeout(() => {
-        if (Notification.permission === 'granted') {
-          new Notification('HabitDash Reminder', {
-            body: 'Time to check off your habits for today!',
-            icon: undefined
+        const ctx1 = document.getElementById("chartTrend");
+        if (ctx1) {
+          charts.trend = new Chart(ctx1, {
+            type: "line",
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "Completion %",
+                  data,
+                  borderColor: "#5b8def",
+                  backgroundColor: "rgba(91,141,239,0.15)",
+                  fill: true,
+                  tension: 0.3,
+                  pointRadius: 3,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                y: {
+                  min: 0,
+                  max: 100,
+                  ticks: {
+                    color: getComputedStyle(
+                      document.documentElement,
+                    ).getPropertyValue("--text-muted"),
+                  },
+                  grid: { color: "rgba(128,128,128,0.1)" },
+                },
+                x: {
+                  ticks: {
+                    color: getComputedStyle(
+                      document.documentElement,
+                    ).getPropertyValue("--text-muted"),
+                    maxRotation: 45,
+                  },
+                  grid: { display: false },
+                },
+              },
+            },
           });
         }
-        scheduleReminder(); // reschedule next day
-      }, ms);
-    }
 
-    // Export
-    document.getElementById('exportBtn').onclick = () => document.getElementById('exportModal').classList.add('open');
-    document.getElementById('closeExport').onclick = () => document.getElementById('exportModal').classList.remove('open');
-    document.getElementById('exportCSV').onclick = () => {
-      let csv = 'Habit,Category,Type,Target,Unit,Date,Value,Completed\n';
-      state.habits.forEach(h => {
-        const dates = Object.keys(h.completed).sort();
-        if (dates.length === 0) {
-          csv += `"${h.name}","${h.category||''}",${h.type},${h.target||1},"${h.unit||''}",,,\n`;
+        const ctx2 = document.getElementById("chartHabits");
+        if (ctx2 && active.length) {
+          charts.habits = new Chart(ctx2, {
+            type: "bar",
+            data: {
+              labels: active.map((h) =>
+                h.name.length > 14 ? h.name.slice(0, 12) + "…" : h.name,
+              ),
+              datasets: [
+                {
+                  label: "30-day rate",
+                  data: active.map((h) => completionRate(h, 30)),
+                  backgroundColor: active.map((h) => h.color),
+                  borderRadius: 6,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                y: {
+                  min: 0,
+                  max: 100,
+                  ticks: {
+                    color: getComputedStyle(
+                      document.documentElement,
+                    ).getPropertyValue("--text-muted"),
+                  },
+                  grid: { color: "rgba(128,128,128,0.1)" },
+                },
+                x: {
+                  ticks: {
+                    color: getComputedStyle(
+                      document.documentElement,
+                    ).getPropertyValue("--text-muted"),
+                  },
+                  grid: { display: false },
+                },
+              },
+            },
+          });
+        }
+      }
+
+      // ===================== ACTIONS =====================
+      function toggleHabit(id, dateStr) {
+        const h = state.habits.find((x) => x.id === id);
+        if (!h) return;
+        if (h.type === "boolean") {
+          h.completed[dateStr] = !isDone(h, dateStr);
         } else {
-          dates.forEach(d => {
-            const val = h.completed[d];
-            csv += `"${h.name}","${h.category||''}",${h.type},${h.target||1},"${h.unit||''}",${d},${val},${isDone(h,d)}\n`;
-          });
+          // for count/duration, toggle to target or 0
+          h.completed[dateStr] = isDone(h, dateStr) ? 0 : h.target || 1;
         }
-      });
-      const blob = new Blob([csv], {type:'text/csv'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `habits-${todayISO()}.csv`;
-      a.click();
-      toast('CSV downloaded');
-      document.getElementById('exportModal').classList.remove('open');
-    };
-    document.getElementById('exportPDF').onclick = () => {
-      document.getElementById('exportModal').classList.remove('open');
-      window.print();
-    };
+        save();
+        render();
+        toast(isDone(h, dateStr) ? "Completed ✓" : "Unmarked");
+      }
+      function changeCount(id, dateStr, delta) {
+        const h = state.habits.find((x) => x.id === id);
+        if (!h) return;
+        let val = Number(h.completed[dateStr] || 0) + delta;
+        if (val < 0) val = 0;
+        h.completed[dateStr] = val;
+        save();
+        render();
+      }
+      function deleteHabit(id) {
+        if (!confirm("Delete this habit and all its history?")) return;
+        state.habits = state.habits.filter((h) => h.id !== id);
+        save();
+        render();
+        toast("Habit deleted");
+      }
 
-    // ===================== INIT =====================
-    load();
-    setView('today');
-    scheduleReminder();
-  </script>
-</body>
+      function openHabitModal(id = null) {
+        editingId = id;
+        selectedColor = "#5b8def";
+        document.getElementById("modalTitle").textContent = id
+          ? "Edit Habit"
+          : "Add Habit";
+        document.getElementById("habitForm").reset();
+        document.getElementById("targetRow").style.display = "none";
+        document
+          .querySelectorAll(".color-swatch")
+          .forEach((s) => s.classList.remove("selected"));
+        document
+          .querySelector('.color-swatch[data-color="#5b8def"]')
+          .classList.add("selected");
+
+        // categories datalist
+        const cats = [
+          ...new Set(state.habits.map((h) => h.category).filter(Boolean)),
+        ];
+        document.getElementById("catList").innerHTML = cats
+          .map((c) => `<option value="${escapeHtml(c)}">`)
+          .join("");
+
+        if (id) {
+          const h = state.habits.find((x) => x.id === id);
+          if (h) {
+            document.getElementById("hName").value = h.name;
+            document.getElementById("hCategory").value = h.category || "";
+            document.getElementById("hType").value = h.type;
+            document.getElementById("hTarget").value = h.target || 1;
+            document.getElementById("hUnit").value = h.unit || "";
+            selectedColor = h.color;
+            document.querySelectorAll(".color-swatch").forEach((s) => {
+              s.classList.toggle("selected", s.dataset.color === h.color);
+            });
+            if (h.type !== "boolean")
+              document.getElementById("targetRow").style.display = "grid";
+          }
+        }
+        document.getElementById("habitModal").classList.add("open");
+      }
+
+      // ===================== BINDINGS =====================
+      function bindDynamicEvents() {
+        document.querySelectorAll('[data-action="toggle"]').forEach((el) => {
+          el.onclick = () => toggleHabit(el.dataset.id, el.dataset.date);
+        });
+        document.querySelectorAll('[data-action="inc"]').forEach((el) => {
+          el.onclick = () => changeCount(el.dataset.id, el.dataset.date, 1);
+        });
+        document.querySelectorAll('[data-action="dec"]').forEach((el) => {
+          el.onclick = () => changeCount(el.dataset.id, el.dataset.date, -1);
+        });
+        document.querySelectorAll('[data-action="edit"]').forEach((el) => {
+          el.onclick = () => openHabitModal(el.dataset.id);
+        });
+        document.querySelectorAll('[data-action="delete"]').forEach((el) => {
+          el.onclick = () => deleteHabit(el.dataset.id);
+        });
+        const notesBtn = document.getElementById("openNotesBtn");
+        if (notesBtn) notesBtn.onclick = () => openNotes();
+      }
+
+      // Static event listeners
+      document.querySelectorAll(".nav-item[data-view]").forEach((el) => {
+        el.addEventListener("click", () => setView(el.dataset.view));
+      });
+
+      document.getElementById("menuBtn").onclick = () => {
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("mobileOverlay").classList.toggle("show");
+      };
+      document.getElementById("mobileOverlay").onclick = () => {
+        document.getElementById("sidebar").classList.remove("open");
+        document.getElementById("mobileOverlay").classList.remove("show");
+      };
+
+      document.getElementById("themeToggle").onclick = () => {
+        applyTheme(state.settings.theme === "dark" ? "light" : "dark");
+        if (currentView === "analytics") render();
+      };
+
+      document.getElementById("addHabitBtn").onclick = () => openHabitModal();
+      document.getElementById("closeModal").onclick = () =>
+        document.getElementById("habitModal").classList.remove("open");
+      document.getElementById("cancelModal").onclick = () =>
+        document.getElementById("habitModal").classList.remove("open");
+
+      document.getElementById("hType").onchange = (e) => {
+        document.getElementById("targetRow").style.display =
+          e.target.value === "boolean" ? "none" : "grid";
+      };
+      document.querySelectorAll(".color-swatch").forEach((s) => {
+        s.onclick = () => {
+          document
+            .querySelectorAll(".color-swatch")
+            .forEach((x) => x.classList.remove("selected"));
+          s.classList.add("selected");
+          selectedColor = s.dataset.color;
+        };
+      });
+
+      document.getElementById("habitForm").onsubmit = (e) => {
+        e.preventDefault();
+        const name = document.getElementById("hName").value.trim();
+        if (!name) return;
+        const data = {
+          name,
+          category: document.getElementById("hCategory").value.trim(),
+          type: document.getElementById("hType").value,
+          target: Number(document.getElementById("hTarget").value) || 1,
+          unit: document.getElementById("hUnit").value.trim(),
+          color: selectedColor,
+        };
+        if (editingId) {
+          const h = state.habits.find((x) => x.id === editingId);
+          if (h) Object.assign(h, data);
+          toast("Habit updated");
+        } else {
+          state.habits.push({
+            id: uid(),
+            ...data,
+            completed: {},
+            created: todayISO(),
+          });
+          toast("Habit added");
+        }
+        save();
+        document.getElementById("habitModal").classList.remove("open");
+        render();
+      };
+
+      // Date navigation
+      document.getElementById("prevDate").onclick = () => {
+        if (currentView === "today") viewDate = addDays(viewDate, -1);
+        else if (currentView === "week") viewDate = addDays(viewDate, -7);
+        else if (currentView === "month")
+          viewDate = new Date(
+            viewDate.getFullYear(),
+            viewDate.getMonth() - 1,
+            1,
+          );
+        updateDateLabel();
+        render();
+      };
+      document.getElementById("nextDate").onclick = () => {
+        if (currentView === "today") viewDate = addDays(viewDate, 1);
+        else if (currentView === "week") viewDate = addDays(viewDate, 7);
+        else if (currentView === "month")
+          viewDate = new Date(
+            viewDate.getFullYear(),
+            viewDate.getMonth() + 1,
+            1,
+          );
+        updateDateLabel();
+        render();
+      };
+      document.getElementById("todayJump").onclick = () => {
+        viewDate = new Date();
+        updateDateLabel();
+        render();
+      };
+
+      // Notes
+      function openNotes() {
+        const s = iso(viewDate);
+        document.getElementById("notesDateLabel").textContent =
+          formatDisplay(viewDate);
+        document.getElementById("notesText").value = state.notes[s] || "";
+        document.getElementById("notesModal").classList.add("open");
+      }
+      document.getElementById("notesNavBtn").onclick = openNotes;
+      document.getElementById("closeNotes").onclick = () =>
+        document.getElementById("notesModal").classList.remove("open");
+      document.getElementById("cancelNotes").onclick = () =>
+        document.getElementById("notesModal").classList.remove("open");
+      document.getElementById("saveNotes").onclick = () => {
+        const s = iso(viewDate);
+        state.notes[s] = document.getElementById("notesText").value;
+        save();
+        document.getElementById("notesModal").classList.remove("open");
+        if (currentView === "today") render();
+        toast("Notes saved");
+      };
+
+      // Reminders
+      document.getElementById("reminderBtn").onclick = () => {
+        document.getElementById("reminderTime").value =
+          state.settings.reminderTime || "09:00";
+        document.getElementById("reminderEnabled").checked =
+          !!state.settings.reminderEnabled;
+        document.getElementById("reminderModal").classList.add("open");
+      };
+      document.getElementById("closeReminder").onclick = () =>
+        document.getElementById("reminderModal").classList.remove("open");
+      document.getElementById("cancelReminder").onclick = () =>
+        document.getElementById("reminderModal").classList.remove("open");
+      document.getElementById("saveReminder").onclick = async () => {
+        state.settings.reminderTime =
+          document.getElementById("reminderTime").value;
+        state.settings.reminderEnabled =
+          document.getElementById("reminderEnabled").checked;
+        save();
+        if (state.settings.reminderEnabled && "Notification" in window) {
+          if (Notification.permission === "default")
+            await Notification.requestPermission();
+          if (Notification.permission === "granted") toast("Reminder enabled");
+          else toast("Please allow notifications in browser settings");
+        } else {
+          toast("Reminder settings saved");
+        }
+        document.getElementById("reminderModal").classList.remove("open");
+        scheduleReminder();
+      };
+
+      let reminderTimer = null;
+      function scheduleReminder() {
+        if (reminderTimer) clearTimeout(reminderTimer);
+        if (!state.settings.reminderEnabled) return;
+        const [hh, mm] = (state.settings.reminderTime || "09:00")
+          .split(":")
+          .map(Number);
+        const now = new Date();
+        let target = new Date();
+        target.setHours(hh, mm, 0, 0);
+        if (target <= now) target = addDays(target, 1);
+        const ms = target - now;
+        reminderTimer = setTimeout(() => {
+          if (Notification.permission === "granted") {
+            new Notification("HabitDash Reminder", {
+              body: "Time to check off your habits for today!",
+              icon: undefined,
+            });
+          }
+          scheduleReminder(); // reschedule next day
+        }, ms);
+      }
+
+      // Export
+      document.getElementById("exportBtn").onclick = () =>
+        document.getElementById("exportModal").classList.add("open");
+      document.getElementById("closeExport").onclick = () =>
+        document.getElementById("exportModal").classList.remove("open");
+      document.getElementById("exportCSV").onclick = () => {
+        let csv = "Habit,Category,Type,Target,Unit,Date,Value,Completed\n";
+        state.habits.forEach((h) => {
+          const dates = Object.keys(h.completed).sort();
+          if (dates.length === 0) {
+            csv += `"${h.name}","${h.category || ""}",${h.type},${h.target || 1},"${h.unit || ""}",,,\n`;
+          } else {
+            dates.forEach((d) => {
+              const val = h.completed[d];
+              csv += `"${h.name}","${h.category || ""}",${h.type},${h.target || 1},"${h.unit || ""}",${d},${val},${isDone(h, d)}\n`;
+            });
+          }
+        });
+        const blob = new Blob([csv], { type: "text/csv" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `habits-${todayISO()}.csv`;
+        a.click();
+        toast("CSV downloaded");
+        document.getElementById("exportModal").classList.remove("open");
+      };
+      document.getElementById("exportPDF").onclick = () => {
+        document.getElementById("exportModal").classList.remove("open");
+        window.print();
+      };
+
+      // ===================== INIT =====================
+      load();
+      setView("today");
+      scheduleReminder();
+    </script>
+  </body>
 </html>

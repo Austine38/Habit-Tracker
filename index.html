@@ -787,6 +787,44 @@
         display: block;
       }
 
+      /* Authentication gate */
+      .layout { display: none; }
+      .layout.authenticated { display: flex; }
+      .auth-screen {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: var(--bg);
+      }
+      .auth-card {
+        width: 100%;
+        max-width: 420px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: var(--shadow);
+      }
+      .auth-card .logo { margin-bottom: 10px; }
+      .auth-subtitle { color: var(--text-muted); margin-bottom: 22px; }
+      .auth-card .form-group { margin-bottom: 14px; }
+      .auth-card input {
+        width: 100%;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 12px 14px;
+        color: var(--text);
+        font: inherit;
+      }
+      .auth-card input:focus { outline: none; border-color: var(--accent); }
+      .auth-actions { display: grid; gap: 10px; margin-top: 18px; }
+      .auth-actions button { width: 100%; justify-content: center; }
+      #authMessage { min-height: 20px; margin-top: 14px; font-size: 0.85rem; overflow-wrap: anywhere; }
+      .start-time { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+
       /* Category colors */
       .cat-dot {
         width: 8px;
@@ -798,6 +836,32 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   </head>
   <body>
+    <section class="auth-screen" id="authScreen" aria-label="Account authentication">
+      <div class="auth-card">
+        <div class="logo">
+          <div class="logo-icon">✓</div>
+          HabitDash
+        </div>
+        <h1 style="font-size:1.35rem; margin-bottom:6px;" id="authTitle">Welcome back</h1>
+        <p class="auth-subtitle" id="authSubtitle">Sign in to access your personal habit dashboard.</p>
+        <form id="authForm">
+          <div class="form-group">
+            <label for="authEmail">Email address</label>
+            <input type="email" id="authEmail" autocomplete="email" required placeholder="you@example.com" />
+          </div>
+          <div class="form-group">
+            <label for="authPassword">Password</label>
+            <input type="password" id="authPassword" autocomplete="current-password" required minlength="6" placeholder="Enter your password" />
+          </div>
+          <div class="auth-actions">
+            <button class="btn btn-primary" type="submit" id="authSubmit">Sign In</button>
+            <button class="btn btn-ghost" type="button" id="authSwitch">Create an account</button>
+          </div>
+          <div id="authMessage" role="status" aria-live="polite"></div>
+        </form>
+      </div>
+    </section>
+
     <div class="overlay-mobile" id="mobileOverlay"></div>
 
     <div class="layout">
@@ -1004,6 +1068,11 @@
                   <option value="duration">Time (minutes)</option>
                 </select>
               </div>
+            </div>
+            <div class="form-group">
+              <label for="hStartTime">Habit start time (24-hour format)</label>
+              <input type="time" id="hStartTime" step="60" />
+              <small style="display:block; color:var(--text-muted); margin-top:5px;">Set the planned start time for this habit. Example: 07:30 or 18:45.</small>
             </div>
             <div class="form-row" id="targetRow" style="display: none">
               <div class="form-group">
@@ -1267,28 +1336,8 @@
 
       // ===================== PERSISTENCE =====================
       function load() {
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            state = { ...state, ...parsed };
-          }
-        } catch (e) {}
-        // Preload default if empty
-        if (state.habits.length === 0) {
-          state.habits.push({
-            id: uid(),
-            name: "Reading The Bible",
-            category: "Spiritual",
-            color: "#5b8def",
-            type: "boolean",
-            target: 1,
-            unit: "",
-            completed: {},
-            created: todayISO(),
-          });
-          save();
-        }
+        // Do not preload demo habits or restore another account's local data.
+        // The signed-in user's state is loaded from their Supabase row instead.
         applyTheme(state.settings.theme || "dark");
       }
       function save() {
@@ -1320,10 +1369,17 @@
 
             console.log("Cloud habit data loaded successfully.");
           } else {
-            console.log("No cloud data found. Uploading existing local data.");
-
+            // A first-time account must start with an empty, private dataset.
+            state = {
+              habits: [],
+              notes: {},
+              settings: {
+                theme: state.settings?.theme || "dark",
+                reminderTime: "09:00",
+                reminderEnabled: false,
+              },
+            };
             const uploadTime = new Date().toISOString();
-
             const { error: uploadError } = await supabaseClient
               .from("user_habit_data")
               .upsert({
@@ -1331,15 +1387,16 @@
                 data: state,
                 updated_at: uploadTime,
               });
-
             if (uploadError) throw uploadError;
-
             lastCloudUpdate = new Date(uploadTime).getTime();
-
-            console.log("Existing local habit data uploaded successfully.");
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            applyTheme(state.settings.theme);
+            render();
+            console.log("New account initialized with empty habit data.");
           }
         } catch (error) {
           console.error("Cloud loading failed:", error.message);
+          throw error;
         } finally {
           isLoadingCloudData = false;
         }
@@ -1482,6 +1539,68 @@
         }
       }
 
+      // ===================== LOGIN / SIGN-UP SCREEN =====================
+      let authMode = "login";
+
+      function showAuthentication(message = "", isError = false) {
+        document.getElementById("authScreen").style.display = "flex";
+        document.querySelector(".layout").classList.remove("authenticated");
+        const messageEl = document.getElementById("authMessage");
+        messageEl.textContent = message;
+        messageEl.style.color = isError ? "#ef4444" : "var(--success)";
+      }
+
+      function showAuthenticatedApp() {
+        document.getElementById("authScreen").style.display = "none";
+        document.querySelector(".layout").classList.add("authenticated");
+      }
+
+      function updateAuthMode() {
+        const signup = authMode === "signup";
+        document.getElementById("authTitle").textContent = signup ? "Create your account" : "Welcome back";
+        document.getElementById("authSubtitle").textContent = signup
+          ? "Create a private account to start tracking your habits."
+          : "Sign in to access your personal habit dashboard.";
+        document.getElementById("authSubmit").textContent = signup ? "Create Account" : "Sign In";
+        document.getElementById("authSwitch").textContent = signup ? "I already have an account" : "Create an account";
+        document.getElementById("authPassword").autocomplete = signup ? "new-password" : "current-password";
+        document.getElementById("authMessage").textContent = "";
+      }
+
+      document.getElementById("authSwitch").addEventListener("click", () => {
+        authMode = authMode === "login" ? "signup" : "login";
+        updateAuthMode();
+      });
+
+      document.getElementById("authForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const email = document.getElementById("authEmail").value.trim();
+        const password = document.getElementById("authPassword").value;
+        const submit = document.getElementById("authSubmit");
+        submit.disabled = true;
+        submit.textContent = authMode === "signup" ? "Creating account..." : "Signing in...";
+        try {
+          if (authMode === "signup") {
+            const { data, error } = await supabaseClient.auth.signUp({ email, password });
+            if (error) throw error;
+            if (data.session) {
+              // Supabase SIGNED_IN event reveals the authenticated dashboard.
+            } else {
+              showAuthentication("Account created. Check your email to confirm registration, then sign in.");
+            }
+          } else {
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+            // Supabase SIGNED_IN event reveals the authenticated dashboard.
+          }
+        } catch (error) {
+          showAuthentication(error.message || "Authentication failed. Please try again.", true);
+        } finally {
+          submit.disabled = false;
+          submit.textContent = authMode === "signup" ? "Create Account" : "Sign In";
+        }
+      });
+
       // ===================== ACCOUNT BUTTON EVENTS =====================
 
       document
@@ -1499,35 +1618,51 @@
       // ===================== SUPABASE SESSION MANAGEMENT =====================
 
       supabaseClient.auth.onAuthStateChange((event, session) => {
-        if (session && (event === "INITIAL_SESSION" || event === "SIGNED_IN")) {
+        if (session && session.user) {
+          const incomingUserId = session.user.id;
+          const isDifferentUser = !currentUser || currentUser.id !== incomingUserId;
           currentUser = session.user;
           updateAccountUI(currentUser);
 
-          setTimeout(async () => {
-            await loadFromCloud();
-            if (currentUser && currentUser.id === session.user.id) {
-              startCloudChecking();
-            }
-          }, 0);
-        }
-
-        if (event === "SIGNED_OUT") {
+          if (isDifferentUser || event === "INITIAL_SESSION") {
+            clearInterval(cloudCheckTimer);
+            clearTimeout(cloudSyncTimer);
+            isLoadingCloudData = true;
+            state = {
+              habits: [],
+              notes: {},
+              settings: { theme: "dark", reminderTime: "09:00", reminderEnabled: false },
+            };
+            setTimeout(async () => {
+              if (!currentUser || currentUser.id !== incomingUserId) return;
+              try {
+                await loadFromCloud();
+                if (currentUser && currentUser.id === incomingUserId) {
+                  showAuthenticatedApp();
+                  startCloudChecking();
+                  scheduleReminder();
+                  render();
+                }
+              } catch (loadError) {
+                console.error("Unable to load this account's habit data:", loadError);
+                showAuthentication("Your account is signed in, but its data could not be loaded. Check your connection and refresh the page.", true);
+              }
+            }, 0);
+          }
+        } else if (event === "INITIAL_SESSION" || event === "SIGNED_OUT") {
           currentUser = null;
+          clearInterval(cloudCheckTimer);
           clearTimeout(cloudSyncTimer);
-
+          isLoadingCloudData = false;
           state = {
             habits: [],
             notes: {},
-            settings: {
-              theme: "dark",
-              reminderTime: "09:00",
-              reminderEnabled: false,
-            },
+            settings: { theme: "dark", reminderTime: "09:00", reminderEnabled: false },
           };
-
           localStorage.removeItem(STORAGE_KEY);
           updateAccountUI(null);
           applyTheme("dark");
+          showAuthentication();
           render();
         }
       });
@@ -1762,6 +1897,7 @@
               </h3>
               <div class="habit-meta">
                 ${h.category ? `<span class="tag">${escapeHtml(h.category)}</span>` : ""}
+                <span class="start-time">◷ ${h.startTime ? escapeHtml(h.startTime) : "Time not set"}</span>
                 <span class="streak-badge">🔥 ${streak} day streak</span>
                 <span>Best: ${calcBestStreak(h)}</span>
                 <span>${rate}% (30d)</span>
@@ -1819,7 +1955,7 @@
 
         active.forEach((h) => {
           html += `<div class="habit-row">
-          <div class="habit-row-name"><span class="cat-dot" style="background:${h.color}"></span>${escapeHtml(h.name)}</div>`;
+          <div class="habit-row-name" title="${escapeHtml(h.name)} — ${h.startTime ? escapeHtml(h.startTime) : "Time not set"}"><span class="cat-dot" style="background:${h.color}"></span><span>${escapeHtml(h.name)}<small style="display:block;color:var(--text-muted);font-variant-numeric:tabular-nums;">${h.startTime ? escapeHtml(h.startTime) : "Time not set"}</small></span></div>`;
           days.forEach((d) => {
             const s = iso(d);
             const done = isDone(h, s);
@@ -1960,6 +2096,7 @@
               <h3>${escapeHtml(h.name)}</h3>
               <div class="habit-meta">
                 ${h.category ? `<span class="tag">${escapeHtml(h.category)}</span>` : ""}
+                <span class="start-time">◷ ${h.startTime ? escapeHtml(h.startTime) : "Time not set"}</span>
                 <span>${h.type === "boolean" ? "Check-off" : h.type === "count" ? `Count (target ${h.target} ${h.unit || ""})` : `Time (target ${h.target} min)`}</span>
                 <span class="streak-badge">🔥 ${calcStreak(h)}</span>
                 <span>Best: ${calcBestStreak(h)}</span>
@@ -2153,6 +2290,7 @@
             document.getElementById("hType").value = h.type;
             document.getElementById("hTarget").value = h.target || 1;
             document.getElementById("hUnit").value = h.unit || "";
+            document.getElementById("hStartTime").value = h.startTime || "";
             selectedColor = h.color;
             document.querySelectorAll(".color-swatch").forEach((s) => {
               s.classList.toggle("selected", s.dataset.color === h.color);
@@ -2234,6 +2372,7 @@
           type: document.getElementById("hType").value,
           target: Number(document.getElementById("hTarget").value) || 1,
           unit: document.getElementById("hUnit").value.trim(),
+          startTime: document.getElementById("hStartTime").value || "",
           color: selectedColor,
         };
         if (editingId) {
@@ -2366,15 +2505,15 @@
       document.getElementById("closeExport").onclick = () =>
         document.getElementById("exportModal").classList.remove("open");
       document.getElementById("exportCSV").onclick = () => {
-        let csv = "Habit,Category,Type,Target,Unit,Date,Value,Completed\n";
+        let csv = "Habit,Category,Start Time (24h),Type,Target,Unit,Date,Value,Completed\n";
         state.habits.forEach((h) => {
           const dates = Object.keys(h.completed).sort();
           if (dates.length === 0) {
-            csv += `"${h.name}","${h.category || ""}",${h.type},${h.target || 1},"${h.unit || ""}",,,\n`;
+            csv += `"${h.name}","${h.category || ""}","${h.startTime || ""}",${h.type},${h.target || 1},"${h.unit || ""}",,,\n`;
           } else {
             dates.forEach((d) => {
               const val = h.completed[d];
-              csv += `"${h.name}","${h.category || ""}",${h.type},${h.target || 1},"${h.unit || ""}",${d},${val},${isDone(h, d)}\n`;
+              csv += `"${h.name}","${h.category || ""}","${h.startTime || ""}",${h.type},${h.target || 1},"${h.unit || ""}",${d},${val},${isDone(h, d)}\n`;
             });
           }
         });
@@ -2393,8 +2532,10 @@
 
       // ===================== INIT =====================
       load();
-      setView("today");
-      scheduleReminder();
+      showAuthentication();
+      updateAuthMode();
+      // Supabase INITIAL_SESSION decides whether to reveal the dashboard.
+      // No dashboard content is rendered before authentication succeeds.
     </script>
   </body>
 </html>

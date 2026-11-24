@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="./habitdash.webmanifest" />
+    <meta name="theme-color" content="#0b0e14" />
     <title>Habit Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -515,6 +517,7 @@
         cursor: default;
         pointer-events: none;
       }
+      .day-cell.not-due { opacity:.22; cursor:default; pointer-events:none; }
 
       /* Month heat map */
       .month-grid {
@@ -825,12 +828,87 @@
       #authMessage { min-height: 20px; margin-top: 14px; font-size: 0.85rem; overflow-wrap: anywhere; }
       .start-time { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
 
+      /* HabitDash development phase workspace */
+      .workspace-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+      .workspace-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px; min-width:0; }
+      .workspace-card h3 { font-size:1rem; margin-bottom:10px; }
+      .workspace-card p, .muted { color:var(--text-muted); font-size:.84rem; }
+      .workspace-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); }
+      .workspace-row:last-child { border-bottom:0; }
+      .workspace-input { width:100%; min-width:0; padding:10px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text); font:inherit; margin:5px 0 10px; }
+      .workspace-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+      .pill-tag { display:inline-block; padding:3px 8px; border-radius:999px; background:var(--surface3); color:var(--text-muted); font-size:.72rem; }
+      .privacy-mode .private-value { filter:blur(7px); user-select:none; }
+      .offline-banner { display:none; padding:10px 14px; margin-bottom:14px; border:1px solid var(--warning); border-radius:9px; color:var(--warning); background:var(--surface); }
+      .offline-banner.show { display:block; }
+      .timer-display { font-size:2.2rem; font-weight:750; font-variant-numeric:tabular-nums; margin:8px 0; }
+      @media(max-width:760px) { .workspace-grid { grid-template-columns:1fr; } .workspace-card { padding:14px; } .workspace-row { align-items:flex-start; } }
+
       /* Category colors */
       .cat-dot {
         width: 8px;
         height: 8px;
         border-radius: 50%;
         flex-shrink: 0;
+      }
+      .period-options { display:flex; gap:6px; flex-wrap:wrap; }
+      .performance-row { display:grid; grid-template-columns:minmax(120px,1fr) minmax(90px,1.3fr) 110px; align-items:center; gap:14px; padding:10px 0; border-top:1px solid var(--border); }
+      .performance-name { display:flex; align-items:center; gap:8px; min-width:0; overflow-wrap:anywhere; }
+      .performance-numbers { display:flex; justify-content:flex-end; align-items:flex-end; flex-direction:column; font-variant-numeric:tabular-nums; }
+      .performance-numbers span,.performance-note { color:var(--text-muted); font-size:.75rem; }
+      .achievement-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+      .achievement { display:flex; gap:12px; align-items:center; border:1px solid var(--border); border-radius:10px; padding:12px; }
+      .achievement.locked { opacity:.55; }
+      .achievement.unlocked { background:color-mix(in srgb,var(--success) 8%,var(--surface)); }
+      .achievement-icon { font-size:1.6rem; }
+      .achievement p,.achievement small { display:block; color:var(--text-muted); font-size:.75rem; }
+      .personal-records { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px; }
+      .personal-records div { background:var(--surface2); border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:4px; }
+      .personal-records span { color:var(--text-muted); font-size:.72rem; }
+      .personal-records strong { font-size:1.1rem; }
+      .journal-date-group { margin:18px 0; }
+      .journal-date-group h3 { font-size:.9rem; margin-bottom:8px; color:var(--accent); }
+      .journal-entry { padding:12px; border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+      .journal-entry-head { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+      .journal-entry-head button { margin-left:auto; }
+      .journal-entry p { white-space:pre-wrap; color:var(--text-muted); margin-top:8px; }
+      @media (max-width: 600px) {
+        body { font-size:13px; }
+        .topbar { align-items:flex-start; gap:10px; }
+        .topbar-left { width:100%; gap:9px; flex-wrap:wrap; }
+        .page-title { font-size:1.1rem; }
+        .date-nav { width:100%; justify-content:space-between; gap:5px; }
+        #currentDateLabel { min-width:0 !important; flex:1; font-size:.78rem; }
+        .topbar-right { width:100%; display:grid; grid-template-columns:1fr 1fr; }
+        .topbar-right button { justify-content:center; }
+        .content { padding:12px 10px 36px; }
+        .stats-row { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+        .stat-card { padding:12px; }
+        .stat-value { font-size:1.35rem; }
+        .card,.chart-card { padding:14px; }
+        .habit-item { grid-template-columns:auto minmax(0,1fr); gap:10px; padding:12px; }
+        .habit-actions { grid-column:1/-1; justify-content:flex-end; flex-wrap:wrap; }
+        .habit-info h3 { flex-wrap:wrap; }
+        .progress-wrap { max-width:none; }
+        .week-header,.habit-row { min-width:650px; grid-template-columns:110px repeat(7,minmax(55px,1fr)); }
+        .card:has(>.week-header) { overflow-x:auto; }
+        .month-grid { gap:3px; }
+        .month-day { border-radius:5px; font-size:.7rem; }
+        .month-day .pct { font-size:.58rem; }
+        .performance-row { grid-template-columns:1fr 85px; gap:6px 10px; }
+        .performance-track { grid-column:1/-1; grid-row:2; }
+        .performance-numbers { grid-column:2; grid-row:1; }
+        .personal-records { grid-template-columns:1fr; }
+        .modal-overlay { padding:8px; align-items:flex-end; }
+        .modal { max-height:94vh; border-radius:16px 16px 10px 10px; }
+        .modal-body { padding:16px; }
+        .modal-footer { padding:12px 16px; }
+        .form-row { grid-template-columns:1fr; gap:0; }
+        .period-options { width:100%; }
+        .period-options button { flex:1; justify-content:center; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,*::before,*::after { scroll-behavior:auto !important; transition:none !important; animation:none !important; }
       }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -856,9 +934,16 @@
           <div class="auth-actions">
             <button class="btn btn-primary" type="submit" id="authSubmit">Sign In</button>
             <button class="btn btn-ghost" type="button" id="authSwitch">Create an account</button>
+            <button class="btn btn-ghost" type="button" id="authResetPassword">Send password-reset email</button>
           </div>
           <div id="authMessage" role="status" aria-live="polite"></div>
         </form>
+        <section id="passwordRecoveryPanel" style="display:none">
+          <p style="color:var(--text-muted);margin:12px 0">Choose a new password for your HabitDash account.</p>
+          <div class="form-group"><label for="recoveryPassword">New password</label><input type="password" id="recoveryPassword" autocomplete="new-password" minlength="8" required placeholder="At least 8 characters" /></div>
+          <div class="auth-actions"><button class="btn btn-primary" type="button" id="saveNewPassword">Update Password</button></div>
+          <div id="recoveryMessage" role="status" aria-live="polite" style="margin-top:12px"></div>
+        </section>
       </div>
     </section>
 
@@ -885,7 +970,13 @@
             <span class="icon">▣</span> Month
           </button>
           <button class="nav-item" data-view="analytics">
-            <span class="icon">📊</span> Analytics
+            <span class="icon">📊</span> Performance & Achievements
+          </button>
+          <button class="nav-item" data-view="workspace">
+            <span class="icon">✦</span> Planning & Tools
+          </button>
+          <button class="nav-item" data-view="journal">
+            <span class="icon">✎</span> Habit Journal
           </button>
 
           <div class="nav-label" style="margin-top: 18px">Manage</div>
@@ -934,6 +1025,7 @@
             >
               Not signed in
             </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:9px;line-height:1.4">Use a unique password and sign out on shared devices. Your account data is loaded through your authenticated Supabase session.</div>
 
             <input
               type="email"
@@ -983,6 +1075,7 @@
               Create Account
             </button>
 
+            <button class="btn btn-ghost" id="accountResetPassword" style="width:100%;justify-content:center;margin-bottom:6px;display:none">Reset Password</button>
             <button
               class="btn btn-ghost"
               id="accountLogout"
@@ -1069,6 +1162,20 @@
                 </select>
               </div>
             </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="hFrequency">Schedule</label>
+                <select id="hFrequency">
+                  <option value="daily">Every day</option>
+                  <option value="weekdays">Weekdays (Mon–Fri)</option>
+                  <option value="custom">Selected days</option>
+                </select>
+              </div>
+              <div class="form-group" id="hDaysWrap" style="display:none">
+                <label for="hDays">Days (0=Sun, 6=Sat)</label>
+                <input id="hDays" type="text" placeholder="1,2,3,4,5" />
+              </div>
+            </div>
             <div class="form-group">
               <label for="hStartTime">Habit start time (24-hour format)</label>
               <input type="time" id="hStartTime" step="60" />
@@ -1086,6 +1193,19 @@
                   id="hUnit"
                   placeholder="pages, glasses, min..."
                 />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="hReminderEnabled">Habit reminder</label>
+                <select id="hReminderEnabled">
+                  <option value="false">Off</option>
+                  <option value="true">On</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="hReminderTime">Reminder time</label>
+                <input type="time" id="hReminderTime" value="09:00" />
               </div>
             </div>
             <div class="form-group">
@@ -1165,6 +1285,40 @@
       </div>
     </div>
 
+    <!-- Per-habit journal entry modal -->
+    <div class="modal-overlay" id="journalModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 id="journalTitle">Habit Reflection</h2>
+          <button class="btn-icon" id="closeJournal" type="button">✕</button>
+        </div>
+        <div class="modal-body">
+          <p id="journalDateLabel" style="color:var(--text-muted);margin-bottom:14px;"></p>
+          <div class="form-group">
+            <label for="journalReason">Reason / status</label>
+            <select id="journalReason">
+              <option value="">No reason selected</option>
+              <option value="Completed">Completed</option>
+              <option value="No time">No time</option>
+              <option value="Forgot">Forgot</option>
+              <option value="Low energy">Low energy</option>
+              <option value="Unexpected interruption">Unexpected interruption</option>
+              <option value="Not feeling well">Not feeling well</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="journalReflection">Reflection</label>
+            <textarea class="notes-area" id="journalReflection" maxlength="3000" placeholder="What helped, what got in the way, and what would you change next time?"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" id="cancelJournal" type="button">Cancel</button>
+          <button class="btn btn-primary" id="saveJournal" type="button">Save Reflection</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Reminder Modal -->
     <div class="modal-overlay" id="reminderModal">
       <div class="modal">
@@ -1180,8 +1334,7 @@
               font-size: 0.9rem;
             "
           >
-            Get a browser notification every day at your chosen time. Works only
-            while this page is open or if you grant notification permission.
+            Set a daily review reminder here, or configure separate reminder times for individual habits. Browser reminders run while HabitDash is open and require notification permission.
           </p>
           <div class="form-group">
             <label>Reminder time</label>
@@ -1226,10 +1379,16 @@
           <button
             class="btn btn-ghost"
             id="exportPDF"
-            style="width: 100%; justify-content: center"
+            style="width: 100%; justify-content: center; margin-bottom:10px"
           >
             Print / Save as PDF
           </button>
+          <button class="btn btn-ghost" id="backupJSON" style="width:100%;justify-content:center;margin-bottom:10px">Download JSON Backup</button>
+          <button class="btn btn-ghost" id="restoreJSONBtn" style="width:100%;justify-content:center;margin-bottom:10px">Restore JSON Backup</button>
+          <button class="btn btn-ghost" id="syncNowBtn" style="width:100%;justify-content:center">Sync Now</button>
+          <div id="syncStatus" role="status" aria-live="polite" style="font-size:.75rem;color:var(--text-muted);margin-top:9px;text-align:center">Cloud sync status: waiting</div>
+          <input type="file" id="restoreJSONFile" accept=".json,application/json" style="display:none" />
+          <p style="font-size:.75rem;color:var(--text-muted);margin-top:12px">A restore replaces the current account's habit data after confirmation. Keep a separate backup before restoring.</p>
         </div>
       </div>
     </div>
@@ -1252,11 +1411,15 @@
       let state = {
         habits: [],
         notes: {},
+        journal: {},
+        deletedHabitIds: [],
         settings: {
           theme: "dark",
           reminderTime: "09:00",
           reminderEnabled: false,
+          reminderSent: {},
         },
+        features: defaultFeatures(),
       };
       let currentView = "today";
       let viewDate = new Date(); // reference date for navigation
@@ -1334,14 +1497,109 @@
           : Date.now().toString(36) + Math.random().toString(36).slice(2);
       }
 
+      // ===================== NEXT-PHASE FEATURE DATA =====================
+      function defaultFeatures() {
+        return { goals: [], routines: [], moodLogs: {}, audit: [], recovery: [], scheduleOverrides: {}, dashboard: { showPlan:true, showGoals:true, showFocus:true }, privacyMask:false, focus: { workMinutes:25, breakMinutes:5, sessions:0 } };
+      }
+      function normalizeFeatures(raw) {
+        const d = defaultFeatures();
+        if (!raw || typeof raw !== "object" || Array.isArray(raw)) return d;
+        const clean = { ...d, ...raw };
+        clean.goals = Array.isArray(raw.goals) ? raw.goals.filter(g => g && typeof g.id === "string" && typeof g.title === "string" && typeof g.habitId === "string").map(g=>({...g,target:Math.max(1,Math.min(365,Math.floor(Number(g.target)||1)))})).slice(-100) : [];
+        clean.routines = Array.isArray(raw.routines) ? raw.routines.filter(r => r && typeof r.id === "string" && typeof r.name === "string").map(r => ({...r, habitIds:Array.isArray(r.habitIds)?[...new Set(r.habitIds.filter(id=>typeof id==="string"))]:[]})).slice(-100) : [];
+        clean.moodLogs = raw.moodLogs && typeof raw.moodLogs === "object" && !Array.isArray(raw.moodLogs) ? raw.moodLogs : {};
+        clean.audit = Array.isArray(raw.audit) ? raw.audit.filter(a=>a && typeof a.action === "string").map(a=>({at:typeof a.at==="string"?a.at:"",action:a.action.slice(0,80),details:typeof a.details==="string"?a.details.slice(0,180):""})).slice(-300) : [];
+        clean.recovery = Array.isArray(raw.recovery) ? raw.recovery.filter(r=>r&&typeof r.habitId==="string"&&typeof r.recoveryDate==="string").slice(-100) : [];
+        clean.scheduleOverrides = raw.scheduleOverrides && typeof raw.scheduleOverrides === "object" && !Array.isArray(raw.scheduleOverrides) ? Object.fromEntries(Object.entries(raw.scheduleOverrides).filter(([id,dates])=>typeof id==="string"&&Array.isArray(dates)).map(([id,dates])=>[id,[...new Set(dates.filter(d=>typeof d==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(d)))]])) : {};
+        clean.dashboard = { ...d.dashboard, ...(raw.dashboard || {}) };
+        clean.dashboard.showPlan = clean.dashboard.showPlan !== false;
+        clean.dashboard.showGoals = clean.dashboard.showGoals !== false;
+        clean.dashboard.showFocus = clean.dashboard.showFocus !== false;
+        clean.focus = {
+          workMinutes:Math.max(1,Math.min(180,Math.floor(Number.isFinite(Number(raw.focus?.workMinutes)) ? Number(raw.focus.workMinutes) : 25))),
+          breakMinutes:Math.max(1,Math.min(60,Math.floor(Number.isFinite(Number(raw.focus?.breakMinutes)) ? Number(raw.focus.breakMinutes) : 5))),
+          sessions:Math.max(0,Math.floor(Number.isFinite(Number(raw.focus?.sessions)) ? Number(raw.focus.sessions) : 0)),
+        };
+        clean.privacyMask = !!raw.privacyMask;
+        return clean;
+      }
+      function auditEvent(action, details="") {
+        if (!state.features) state.features = defaultFeatures();
+        state.features.audit.push({ at:new Date().toISOString(), action:String(action).slice(0,80), details:String(details).slice(0,180) });
+        state.features.audit = state.features.audit.slice(-300);
+      }
+      function habitIsDue(habit, dateStr) {
+        if (!habit || (habit.created && dateStr < habit.created)) return false;
+        if (state.features?.scheduleOverrides?.[habit.id]?.includes?.(dateStr)) return true;
+        const schedule = habit.schedule || { frequency:"daily", days:[] };
+        const day = parseISO(dateStr).getDay();
+        if (schedule.frequency === "weekdays") return day >= 1 && day <= 5;
+        if (schedule.frequency === "custom") return Array.isArray(schedule.days) && schedule.days.includes(day);
+        return true;
+      }
+      function wouldCreateDependencyCycle(dependentId, prerequisiteId) {
+        let cursor = state.habits.find(h=>h.id===prerequisiteId);
+        const visited = new Set();
+        while (cursor) {
+          if (cursor.id === dependentId || visited.has(cursor.id)) return true;
+          visited.add(cursor.id);
+          cursor = cursor.dependsOn ? state.habits.find(h=>h.id===cursor.dependsOn) : null;
+        }
+        return false;
+      }
+      function featureGoalProgress(goal) {
+        const habit = state.habits.find(h=>h.id===goal.habitId);
+        if (!habit) return 0;
+        const start = goal.startDate || habit.created || todayISO();
+        let count=0;
+        Object.keys(habit.completed || {}).forEach(date=>{ if(date>=start && date<=todayISO() && habitIsDue(habit,date) && isDone(habit,date)) count++; });
+        return Math.min(100, Math.round(count / Math.max(1, Number(goal.target)||1) * 100));
+      }
+      function normalizeState(input) {
+        const safe = input && typeof input === "object" ? input : {};
+        return {
+          ...safe,
+          habits: Array.isArray(safe.habits) ? safe.habits.map((h) => ({
+            ...h,
+            schedule: {
+              frequency: ["daily","weekdays","custom"].includes(h?.schedule?.frequency) ? h.schedule.frequency : "daily",
+              days: Array.isArray(h?.schedule?.days) ? [...new Set(h.schedule.days.map(Number).filter(d=>Number.isInteger(d)&&d>=0&&d<=6))] : [],
+            },
+            completed: h && typeof h.completed === "object" && h.completed ? h.completed : {},
+            reminderEnabled: !!h.reminderEnabled,
+            reminderTime: h.reminderTime || h.startTime || "09:00",
+          })) : [],
+          notes: safe.notes && typeof safe.notes === "object" ? safe.notes : {},
+          journal: safe.journal && typeof safe.journal === "object" ? safe.journal : {},
+          deletedHabitIds: Array.isArray(safe.deletedHabitIds) ? safe.deletedHabitIds : [],
+          settings: {
+            theme: safe.settings?.theme === "light" ? "light" : "dark",
+            reminderTime: safe.settings?.reminderTime || "09:00",
+            reminderEnabled: !!safe.settings?.reminderEnabled,
+            reminderSent: safe.settings?.reminderSent && typeof safe.settings.reminderSent === "object" ? safe.settings.reminderSent : {},
+            ...(safe.settings || {}),
+          },
+          features: normalizeFeatures(safe.features),
+        };
+      }
+
       // ===================== PERSISTENCE =====================
       function load() {
         // Do not preload demo habits or restore another account's local data.
         // The signed-in user's state is loaded from their Supabase row instead.
         applyTheme(state.settings.theme || "dark");
       }
+      let hasPendingLocalChanges = false;
+      let localChangeRevision = 0;
+      function setSyncStatus(message, isError = false) {
+        const el = document.getElementById("syncStatus");
+        if (el) { el.textContent = `Cloud sync: ${message}`; el.style.color = isError ? "var(--danger)" : "var(--text-muted)"; }
+      }
       function save() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        hasPendingLocalChanges = true;
+        localChangeRevision++;
+        setSyncStatus("changes saved locally; syncing…");
         scheduleCloudSync();
       }
       async function loadFromCloud() {
@@ -1359,9 +1617,11 @@
           if (error) throw error;
 
           if (data && data.data) {
-            state = { ...state, ...data.data };
+            state = normalizeState({ ...state, ...data.data });
 
             lastCloudUpdate = new Date(data.updated_at).getTime();
+            hasPendingLocalChanges = false;
+            setSyncStatus("up to date");
 
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             applyTheme(state.settings.theme || "dark");
@@ -1373,11 +1633,15 @@
             state = {
               habits: [],
               notes: {},
+              journal: {},
+              deletedHabitIds: [],
               settings: {
                 theme: state.settings?.theme || "dark",
                 reminderTime: "09:00",
                 reminderEnabled: false,
+                reminderSent: {},
               },
+              features: defaultFeatures(),
             };
             const uploadTime = new Date().toISOString();
             const { error: uploadError } = await supabaseClient
@@ -1389,6 +1653,8 @@
               });
             if (uploadError) throw uploadError;
             lastCloudUpdate = new Date(uploadTime).getTime();
+            hasPendingLocalChanges = false;
+            setSyncStatus("account initialized");
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             applyTheme(state.settings.theme);
             render();
@@ -1402,12 +1668,53 @@
         }
       }
       // ===================== AUTOMATIC CROSS-DEVICE SYNC =====================
+      function mergeFeatureState(remoteRaw, localRaw) {
+        const remote = normalizeFeatures(remoteRaw), local = normalizeFeatures(localRaw);
+        const mergeById = (a,b) => [...new Map([...a,...b].map(x=>[x.id,x])).values()];
+        const overrides = { ...remote.scheduleOverrides };
+        Object.entries(local.scheduleOverrides).forEach(([id,dates]) => {
+          overrides[id] = [...new Set([...(overrides[id] || []), ...(Array.isArray(dates)?dates:[])])];
+        });
+        const audit = [...remote.audit, ...local.audit].filter((x,i,arr)=>arr.findIndex(y=>y.at===x.at&&y.action===x.action&&y.details===x.details)===i).slice(-300);
+        const recovery = [...remote.recovery, ...local.recovery].filter((x,i,arr)=>arr.findIndex(y=>y.habitId===x.habitId&&y.missedDate===x.missedDate&&y.recoveryDate===x.recoveryDate)===i).slice(-100);
+        return {
+          ...remote, ...local,
+          goals: mergeById(remote.goals,local.goals).slice(-100),
+          routines: mergeById(remote.routines,local.routines).slice(-100),
+          moodLogs: { ...remote.moodLogs, ...local.moodLogs },
+          audit, recovery, scheduleOverrides: overrides,
+          dashboard: { ...remote.dashboard, ...local.dashboard },
+          focus: { ...remote.focus, ...local.focus },
+        };
+      }
+      function mergeCloudState(localData, remoteData) {
+        const local = normalizeState(localData);
+        const remote = normalizeState(remoteData);
+        const byId = new Map(remote.habits.map(h => [h.id, h]));
+        local.habits.forEach(h => {
+          const old = byId.get(h.id);
+          byId.set(h.id, old ? { ...old, ...h, completed: { ...(old.completed || {}), ...(h.completed || {}) } } : h);
+        });
+        const deletedHabitIds = [...new Set([...(remote.deletedHabitIds || []), ...(local.deletedHabitIds || [])])];
+        deletedHabitIds.forEach(id => byId.delete(id));
+        const journal = { ...remote.journal };
+        Object.entries(local.journal).forEach(([date, entries]) => { journal[date] = { ...(journal[date] || {}), ...(entries || {}) }; });
+        return normalizeState({
+          ...remote, ...local,
+          habits: [...byId.values()],
+          deletedHabitIds,
+          notes: { ...remote.notes, ...local.notes },
+          journal,
+          settings: { ...remote.settings, ...local.settings },
+          features: mergeFeatureState(remote.features, local.features),
+        });
+      }
 
       let lastCloudUpdate = null;
       let cloudCheckTimer = null;
 
       async function checkCloudUpdates() {
-        if (!currentUser || isLoadingCloudData) return;
+        if (!navigator.onLine || !currentUser || isLoadingCloudData || isSyncingCloudData) return;
 
         try {
           const { data, error } = await supabaseClient
@@ -1423,22 +1730,26 @@
 
           if (lastCloudUpdate && cloudTime > lastCloudUpdate) {
             isLoadingCloudData = true;
-
-            state = { ...state, ...data.data };
-
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-
+            if (hasPendingLocalChanges) {
+              state = mergeCloudState(state, data.data);
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+              setSyncStatus("merged updates from another device; syncing…");
+              scheduleCloudSync();
+            } else {
+              state = normalizeState({ ...state, ...data.data });
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+              setSyncStatus("updated from another device");
+            }
             applyTheme(state.settings.theme || "dark");
             render();
-
-            console.log("New changes received from cloud.");
+            console.log("New cloud changes received and reconciled.");
           }
-
           lastCloudUpdate = cloudTime;
         } catch (error) {
           console.error("Cloud update check failed:", error.message);
         } finally {
           isLoadingCloudData = false;
+          if (hasPendingLocalChanges) scheduleCloudSync();
         }
       }
 
@@ -1468,6 +1779,7 @@
           document.getElementById("accountLogin").style.display = "none";
           document.getElementById("accountSignup").style.display = "none";
           document.getElementById("accountLogout").style.display = "block";
+          document.getElementById("accountResetPassword").style.display = "block";
         } else {
           status.textContent = "Not signed in";
           document.getElementById("accountEmail").style.display = "block";
@@ -1475,6 +1787,7 @@
           document.getElementById("accountLogin").style.display = "block";
           document.getElementById("accountSignup").style.display = "block";
           document.getElementById("accountLogout").style.display = "none";
+          document.getElementById("accountResetPassword").style.display = "none";
         }
       }
 
@@ -1537,6 +1850,14 @@
           updateAccountUI(null);
           showAccountMessage("Signed out successfully.");
         }
+      }
+
+      async function sendPasswordReset(email) {
+        const address = (email || "").trim();
+        if (!address) { showAccountMessage("Enter your account email first.", true); return; }
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(address, { redirectTo: window.location.href });
+        if (error) showAccountMessage(error.message, true);
+        else showAccountMessage("If the address belongs to an account, a password-reset email has been sent.");
       }
 
       // ===================== LOGIN / SIGN-UP SCREEN =====================
@@ -1614,10 +1935,42 @@
       document
         .getElementById("accountLogout")
         .addEventListener("click", logoutAccount);
+      document.getElementById("accountResetPassword").addEventListener("click", () => sendPasswordReset(currentUser?.email || ""));
+      document.getElementById("authResetPassword").addEventListener("click", async () => {
+        const email = document.getElementById("authEmail").value.trim();
+        if (!email) { document.getElementById("authMessage").textContent = "Enter your email address first."; return; }
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+        document.getElementById("authMessage").textContent = error ? error.message : "If the address belongs to an account, a password-reset email has been sent.";
+      });
+      document.getElementById("saveNewPassword").addEventListener("click", async () => {
+        const password = document.getElementById("recoveryPassword").value;
+        const message = document.getElementById("recoveryMessage");
+        if (password.length < 8) { message.textContent = "Use a password with at least 8 characters."; return; }
+        const { error } = await supabaseClient.auth.updateUser({ password });
+        if (error) { message.textContent = error.message; return; }
+        message.textContent = "Password updated. Loading your HabitDash data…";
+        try {
+          await loadFromCloud();
+          document.getElementById("authForm").style.display = "block";
+          document.getElementById("passwordRecoveryPanel").style.display = "none";
+          showAuthenticatedApp(); startCloudChecking(); scheduleReminder(); render();
+          toast("Password updated successfully");
+        } catch (error) { message.textContent = "Password updated, but habit data could not be loaded. Refresh and sign in again."; }
+      });
 
       // ===================== SUPABASE SESSION MANAGEMENT =====================
 
       supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (event === "PASSWORD_RECOVERY" && session?.user) {
+          currentUser = session.user;
+          updateAccountUI(currentUser);
+          document.getElementById("authScreen").style.display = "flex";
+          document.querySelector(".layout").classList.remove("authenticated");
+          document.getElementById("authForm").style.display = "none";
+          document.getElementById("passwordRecoveryPanel").style.display = "block";
+          document.getElementById("authTitle").textContent = "Set a new password";
+          return;
+        }
         if (session && session.user) {
           const incomingUserId = session.user.id;
           const isDifferentUser = !currentUser || currentUser.id !== incomingUserId;
@@ -1631,7 +1984,9 @@
             state = {
               habits: [],
               notes: {},
-              settings: { theme: "dark", reminderTime: "09:00", reminderEnabled: false },
+              journal: {},
+              deletedHabitIds: [],
+              settings: { theme: "dark", reminderTime: "09:00", reminderEnabled: false, reminderSent: {} },
             };
             setTimeout(async () => {
               if (!currentUser || currentUser.id !== incomingUserId) return;
@@ -1653,11 +2008,16 @@
           currentUser = null;
           clearInterval(cloudCheckTimer);
           clearTimeout(cloudSyncTimer);
+          clearInterval(reminderTimer);
+          hasPendingLocalChanges = false;
           isLoadingCloudData = false;
           state = {
             habits: [],
             notes: {},
-            settings: { theme: "dark", reminderTime: "09:00", reminderEnabled: false },
+            journal: {},
+            deletedHabitIds: [],
+            settings: { theme: "dark", reminderTime: "09:00", reminderEnabled: false, reminderSent: {} },
+            features: defaultFeatures(),
           };
           localStorage.removeItem(STORAGE_KEY);
           updateAccountUI(null);
@@ -1672,26 +2032,44 @@
       let cloudSyncTimer = null;
       let isLoadingCloudData = false;
 
+      let isSyncingCloudData = false;
       async function syncToCloud() {
-        if (!currentUser || isLoadingCloudData) return;
-
-        const updatedAt = new Date().toISOString();
-
-        const { error } = await supabaseClient.from("user_habit_data").upsert({
-          user_id: currentUser.id,
-          data: state,
-          updated_at: updatedAt,
-        });
-
-        if (error) {
-          console.error("Cloud sync failed:", error.message);
-        } else {
+        if (!navigator.onLine) { setSyncStatus("offline; changes remain saved on this device", true); return false; }
+        if (!currentUser || isLoadingCloudData || isSyncingCloudData) return false;
+        isSyncingCloudData = true;
+        const revisionAtStart = localChangeRevision;
+        setSyncStatus("syncing…");
+        try {
+          // Reconcile any remote update that arrived since the last poll before uploading.
+          const { data: remote, error: readError } = await supabaseClient
+            .from("user_habit_data").select("data, updated_at")
+            .eq("user_id", currentUser.id).maybeSingle();
+          if (readError) throw readError;
+          if (remote?.data && lastCloudUpdate && new Date(remote.updated_at).getTime() > lastCloudUpdate) {
+            state = mergeCloudState(state, remote.data);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          }
+          const updatedAt = new Date().toISOString();
+          const { error } = await supabaseClient.from("user_habit_data").upsert({
+            user_id: currentUser.id, data: state, updated_at: updatedAt,
+          });
+          if (error) throw error;
           lastCloudUpdate = new Date(updatedAt).getTime();
+          if (revisionAtStart === localChangeRevision) hasPendingLocalChanges = false;
+          setSyncStatus("up to date · " + new Date(updatedAt).toLocaleTimeString());
           console.log("Habit data synced successfully.");
+          return true;
+        } catch (error) {
+          console.error("Cloud sync failed:", error.message);
+          setSyncStatus("failed; your local changes are retained", true);
+          return false;
+        } finally {
+          isSyncingCloudData = false;
         }
       }
 
       function scheduleCloudSync() {
+        if (!navigator.onLine) { setSyncStatus("offline; local changes retained", true); return; }
         if (!currentUser || isLoadingCloudData) return;
 
         clearTimeout(cloudSyncTimer);
@@ -1711,48 +2089,123 @@
       function getValue(habit, dateStr) {
         return habit.completed[dateStr] || 0;
       }
+      function progressPercent(habit, dateStr) {
+        const value = getValue(habit, dateStr);
+        if (habit.type === "boolean") return value ? 100 : 0;
+        const target = Math.max(1, Number(habit.target) || 1);
+        return Math.max(0, Math.min(100, Math.round((Number(value) / target) * 100)));
+      }
+      function hasProgress(habit, dateStr) {
+        return progressPercent(habit, dateStr) > 0;
+      }
+      function getDailyCompletionPercent(dateStr) {
+        const eligible = state.habits.filter(h => !h.archived && habitIsDue(h, dateStr));
+        if (!eligible.length) return 0;
+        const total = eligible.reduce((sum,h) => sum + progressPercent(h,dateStr), 0);
+        return Math.round(total / eligible.length);
+      }
+      function averageProgressRate(habit, days = 30) {
+        let total = 0, eligible = 0;
+        for (let i = days - 1; i >= 0; i--) {
+          const date = iso(addDays(new Date(), -i));
+          if (date < (habit.created || date) || !habitIsDue(habit,date)) continue;
+          total += progressPercent(habit,date);
+          eligible++;
+        }
+        return eligible ? Math.round(total / eligible) : 0;
+      }
       function calcStreak(habit) {
         let streak = 0;
         let d = new Date();
-        // If today not done, start counting from yesterday
-        if (!isDone(habit, iso(d))) d = addDays(d, -1);
-        while (isDone(habit, iso(d))) {
-          streak++;
+        if (habitIsDue(habit, iso(d)) && !hasProgress(habit, iso(d))) d = addDays(d, -1);
+        while (habit.created ? iso(d) >= habit.created : true) {
+          const key = iso(d);
+          if (habitIsDue(habit, key)) {
+            if (!hasProgress(habit, key)) break;
+            streak++;
+          }
+          d = addDays(d, -1);
+        }
+        return streak;
+      }
+      function calcFullStreak(habit) {
+        let streak = 0;
+        let d = new Date();
+        if (habitIsDue(habit, iso(d)) && progressPercent(habit, iso(d)) !== 100) d = addDays(d, -1);
+        while (habit.created ? iso(d) >= habit.created : true) {
+          const key = iso(d);
+          if (habitIsDue(habit, key)) {
+            if (progressPercent(habit, key) !== 100) break;
+            streak++;
+          }
           d = addDays(d, -1);
         }
         return streak;
       }
       function calcBestStreak(habit) {
-        const dates = Object.keys(habit.completed)
-          .filter((k) => isDone(habit, k))
-          .sort();
-        if (dates.length === 0) return 0;
-        let best = 1,
-          cur = 1;
-        for (let i = 1; i < dates.length; i++) {
-          const prev = parseISO(dates[i - 1]);
-          const curr = parseISO(dates[i]);
-          const diff = (curr - prev) / 86400000;
-          if (diff === 1) {
-            cur++;
-            best = Math.max(best, cur);
-          } else if (diff > 1) cur = 1;
+        const dates = Object.keys(habit.completed || {}).filter(k => hasProgress(habit,k)).sort();
+        if (!dates.length) return 0;
+        let best=0, current=0, cursor=parseISO(habit.created || dates[0]), last=parseISO(dates[dates.length-1]);
+        while (cursor <= last) {
+          const key=iso(cursor);
+          if (habitIsDue(habit,key)) {
+            if (hasProgress(habit,key)) { current++; best=Math.max(best,current); }
+            else current=0;
+          }
+          cursor=addDays(cursor,1);
         }
         return best;
       }
       function completionRate(habit, days = 30) {
-        let done = 0,
-          total = 0;
-        let d = new Date();
+        let done = 0, total = 0;
         for (let i = 0; i < days; i++) {
-          const s = iso(d);
-          if (s >= habit.created) {
+          const s = iso(addDays(new Date(), -i));
+          if (habitIsDue(habit, s)) {
             total++;
             if (isDone(habit, s)) done++;
           }
-          d = addDays(d, -1);
         }
         return total ? Math.round((done / total) * 100) : 0;
+      }
+      let performancePeriod = 7;
+      function getPeriodStats(days) {
+        const active = state.habits.filter((h) => !h.archived);
+        let possible = 0, completed = 0, progressTotal = 0;
+        const rows = active.map((h) => {
+          let eligible = 0, done = 0, progress = 0;
+          for (let i = days - 1; i >= 0; i--) {
+            const date = iso(addDays(new Date(), -i));
+            if (!habitIsDue(h, date)) continue;
+            eligible++;
+            const pct = progressPercent(h, date);
+            progress += pct;
+            if (pct === 100) done++;
+          }
+          possible += eligible;
+          completed += done;
+          progressTotal += progress;
+          return { habit: h, eligible, done, rate: eligible ? Math.round(done / eligible * 100) : 0, average: eligible ? Math.round(progress / eligible) : 0 };
+        });
+        return { days, rows, eligible: possible, completed, rate: possible ? Math.round(completed / possible * 100) : 0, averageProgress: possible ? Math.round(progressTotal / possible) : 0 };
+      }
+      function renderPerformanceAnalyser() {
+        const stats = getPeriodStats(performancePeriod);
+        const options = [7, 14, 30].map((n) => `<button type="button" class="btn ${performancePeriod === n ? "btn-primary" : "btn-ghost"} btn-sm" data-period="${n}">${n} Days</button>`).join("");
+        let html = `<section class="card performance-card">
+          <div class="card-header"><div><div class="card-title">Habit Performance Analyser</div><div style="color:var(--text-muted);font-size:.8rem;margin-top:4px">Completion and consistency over a selected period</div></div><div class="period-options" role="group" aria-label="Analysis period">${options}</div></div>
+          <div class="stats-row analyser-stats">
+            <div class="stat-card"><div class="stat-label">Completed targets</div><div class="stat-value success">${stats.completed}/${stats.eligible}</div></div>
+            <div class="stat-card"><div class="stat-label">Completion rate</div><div class="stat-value accent">${stats.rate}%</div></div>
+            <div class="stat-card"><div class="stat-label">Average progress</div><div class="stat-value">${stats.averageProgress}%</div></div>
+            <div class="stat-card"><div class="stat-label">Habits analysed</div><div class="stat-value">${stats.rows.length}</div></div>
+          </div>
+          <div class="card-title" style="margin:8px 0 14px">Habit breakdown · Last ${performancePeriod} days</div>`;
+        if (!stats.rows.length) html += `<div class="empty"><h3>No habits to analyse</h3><p>Add a habit to start building performance history.</p></div>`;
+        stats.rows.sort((a,b) => b.average-a.average || b.rate-a.rate).forEach(({habit,eligible,done,rate,average}) => {
+          html += `<div class="performance-row"><div class="performance-name"><span class="cat-dot" style="background:${habit.color}"></span><strong>${escapeHtml(habit.name)}</strong></div><div class="performance-track"><div class="progress-wrap"><div class="progress-bar" style="width:${average}%;background:${habit.color}"></div></div></div><div class="performance-numbers"><strong>${average}%</strong><span>${done}/${eligible} full days</span></div></div>`;
+        });
+        html += `<p class="performance-note">Boolean habits score 0% or 100%. Count and Duration habits score proportionally to their target. A 0% day breaks a consistency streak; any progress continues it; only 100% extends a full-completion streak. Completion rate counts only days when the full target was reached. Days before a habit was created are excluded.</p></section>`;
+        return html;
       }
 
       // ===================== THEME =====================
@@ -1763,7 +2216,6 @@
           theme === "dark" ? "☾" : "☀";
         document.getElementById("themeLabel").textContent =
           theme === "dark" ? "Dark" : "Light";
-        save();
       }
 
       // ===================== RENDER =====================
@@ -1776,12 +2228,14 @@
           today: "Today",
           week: "This Week",
           month: "Month",
-          analytics: "Analytics",
+          analytics: "Performance & Achievements",
+          journal: "Habit Journal",
           habits: "All Habits",
+          workspace: "Planning & Tools",
         };
         document.getElementById("pageTitle").textContent = titles[view] || view;
         document.getElementById("dateNav").style.display =
-          view === "analytics" || view === "habits" ? "none" : "flex";
+          ["analytics", "journal", "habits", "workspace"].includes(view) ? "none" : "flex";
         updateDateLabel();
         render();
         // close mobile sidebar
@@ -1819,24 +2273,27 @@
           content.innerHTML = renderAnalytics();
         else if (currentView === "habits")
           content.innerHTML = renderHabitsList();
+        else if (currentView === "journal")
+          content.innerHTML = renderJournalView();
+        else if (currentView === "workspace")
+          content.innerHTML = renderWorkspace();
 
         // re-bind after innerHTML
         bindDynamicEvents();
+        if (currentView === "workspace") bindWorkspaceEvents();
         if (currentView === "analytics") initCharts();
       }
 
       function renderStats() {
-        const active = state.habits.filter((h) => !h.archived);
         const t = todayISO();
+        const active = state.habits.filter((h) => !h.archived && habitIsDue(h, t));
         let doneToday = 0;
         let bestStreak = 0;
         active.forEach((h) => {
           if (isDone(h, t)) doneToday++;
           bestStreak = Math.max(bestStreak, calcStreak(h));
         });
-        const rate = active.length
-          ? Math.round((doneToday / active.length) * 100)
-          : 0;
+        const rate = getDailyCompletionPercent(t);
 
         return `
         <div class="stats-row">
@@ -1845,7 +2302,7 @@
             <div class="stat-value accent">${active.length}</div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Done Today</div>
+            <div class="stat-label">Full Targets Today</div>
             <div class="stat-value success">${doneToday} / ${active.length}</div>
           </div>
           <div class="stat-card">
@@ -1853,7 +2310,7 @@
             <div class="stat-value warning">${bestStreak} days</div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Today's Rate</div>
+            <div class="stat-label">Today's Progress</div>
             <div class="stat-value">${rate}%</div>
           </div>
         </div>
@@ -1862,12 +2319,10 @@
 
       function renderToday() {
         const dateStr = iso(viewDate);
-        const active = state.habits.filter((h) => !h.archived);
+        const active = state.habits.filter((h) => !h.archived && habitIsDue(h, dateStr));
         if (active.length === 0) {
-          return (
-            renderStats() +
-            `<div class="empty"><h3>No habits yet</h3><p>Add your first habit to start tracking.</p></div>`
-          );
+          const hasAny = state.habits.some(h => !h.archived);
+          return renderStats() + `<div class="empty"><h3>${hasAny ? "No habits scheduled" : "No habits yet"}</h3><p>${hasAny ? "Nothing is scheduled for this date. Check your flexible schedules in Planning & Tools." : "Add your first habit to start tracking."}</p></div>`;
         }
 
         let html = renderStats();
@@ -1878,12 +2333,8 @@
           const streak = calcStreak(h);
           const rate = completionRate(h, 30);
           const target = h.target || 1;
-          const progress =
-            h.type === "boolean"
-              ? done
-                ? 100
-                : 0
-              : Math.min(100, Math.round((val / target) * 100));
+          const progress = progressPercent(h, dateStr);
+          const journalEntry = state.journal?.[dateStr]?.[h.id];
 
           html += `
           <div class="habit-item" data-id="${h.id}">
@@ -1900,13 +2351,16 @@
                 <span class="start-time">◷ ${h.startTime ? escapeHtml(h.startTime) : "Time not set"}</span>
                 <span class="streak-badge">🔥 ${streak} day streak</span>
                 <span>Best: ${calcBestStreak(h)}</span>
+                <span>${calcFullStreak(h)} full days</span>
                 <span>${rate}% (30d)</span>
+                ${journalEntry ? `<span class="tag">Journal: ${escapeHtml(journalEntry.reason || "Saved")}</span>` : ""}
               </div>
               <div class="progress-wrap">
                 <div class="progress-bar" style="width:${progress}%; background:${h.color}"></div>
               </div>
             </div>
             <div class="habit-actions">
+              <button class="btn btn-ghost btn-sm" data-action="journal" data-id="${h.id}" data-date="${dateStr}" title="Record a reason or reflection">Journal</button>
               ${
                 h.type !== "boolean"
                   ? `
@@ -1958,15 +2412,16 @@
           <div class="habit-row-name" title="${escapeHtml(h.name)} — ${h.startTime ? escapeHtml(h.startTime) : "Time not set"}"><span class="cat-dot" style="background:${h.color}"></span><span>${escapeHtml(h.name)}<small style="display:block;color:var(--text-muted);font-variant-numeric:tabular-nums;">${h.startTime ? escapeHtml(h.startTime) : "Time not set"}</small></span></div>`;
           days.forEach((d) => {
             const s = iso(d);
-            const done = isDone(h, s);
+            const pct = progressPercent(h, s);
             const val = getValue(h, s);
             const future = s > today;
             let cls = "day-cell";
-            if (done) cls += " done";
-            else if (h.type !== "boolean" && val > 0) cls += " partial";
+            if (pct === 100) cls += " done";
+            else if (pct > 0) cls += " partial";
             if (s === today) cls += " today";
             if (future) cls += " future";
-            html += `<div class="${cls}" data-action="toggle" data-id="${h.id}" data-date="${s}" title="${s}">${done ? "✓" : val || ""}</div>`;
+            if (!habitIsDue(h, s)) cls += " not-due";
+            html += `<div class="${cls}" data-action="toggle" data-id="${h.id}" data-date="${s}" title="${s}: ${pct}% progress">${pct ? `${pct}%` : ""}</div>`;
           });
           html += `</div>`;
         });
@@ -1994,13 +2449,7 @@
         for (let day = 1; day <= totalDays; day++) {
           const d = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
           const s = iso(d);
-          let doneCount = 0;
-          active.forEach((h) => {
-            if (isDone(h, s)) doneCount++;
-          });
-          const pct = active.length
-            ? Math.round((doneCount / active.length) * 100)
-            : 0;
+          const pct = getDailyCompletionPercent(s);
           let heat = 0;
           if (pct >= 100) heat = 4;
           else if (pct >= 75) heat = 3;
@@ -2017,24 +2466,23 @@
         // Per-habit mini summary
         html += `<div class="card" style="margin-top:16px;"><div class="card-title" style="margin-bottom:14px;">Habit performance this month</div>`;
         active.forEach((h) => {
-          let done = 0,
-            total = 0;
+          let fullDays = 0, total = 0, progressTotal = 0;
           for (let day = 1; day <= totalDays; day++) {
-            const s = iso(
-              new Date(viewDate.getFullYear(), viewDate.getMonth(), day),
-            );
+            const s = iso(new Date(viewDate.getFullYear(), viewDate.getMonth(), day));
             if (s > today) break;
-            if (s >= h.created) {
+            if (habitIsDue(h, s)) {
               total++;
-              if (isDone(h, s)) done++;
+              const dailyPct = progressPercent(h, s);
+              progressTotal += dailyPct;
+              if (dailyPct === 100) fullDays++;
             }
           }
-          const pct = total ? Math.round((done / total) * 100) : 0;
+          const pct = total ? Math.round(progressTotal / total) : 0;
           html += `
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
             <span class="cat-dot" style="background:${h.color}"></span>
             <span style="flex:1;font-weight:500;">${escapeHtml(h.name)}</span>
-            <span style="color:var(--text-muted);font-size:0.85rem;">${done}/${total}</span>
+            <span style="color:var(--text-muted);font-size:0.85rem;">${fullDays}/${total} full</span>
             <div class="progress-wrap" style="max-width:120px;">
               <div class="progress-bar" style="width:${pct}%;background:${h.color}"></div>
             </div>
@@ -2048,10 +2496,11 @@
       function renderAnalytics() {
         const active = state.habits.filter((h) => !h.archived);
         let html = renderStats();
+        html += renderPerformanceAnalyser();
         html += `
         <div class="charts-grid">
           <div class="chart-card">
-            <h3>Completion last 14 days</h3>
+            <h3>Average daily progress · 14 days</h3>
             <div class="chart-wrap"><canvas id="chartTrend"></canvas></div>
           </div>
           <div class="chart-card">
@@ -2072,12 +2521,48 @@
             <span style="width:24px;font-weight:700;color:var(--text-muted);">#${i + 1}</span>
             <span class="cat-dot" style="background:${h.color}"></span>
             <span style="flex:1;font-weight:500;">${escapeHtml(h.name)}</span>
-            <span class="streak-badge">🔥 ${calcStreak(h)}</span>
+            <span class="streak-badge">🔥 ${calcStreak(h)} consistency</span>
+            <span style="color:var(--text-muted);font-size:0.85rem;">${calcFullStreak(h)} full streak</span>
             <span style="color:var(--text-muted);font-size:0.85rem;">Best ${calcBestStreak(h)}</span>
           </div>`;
         });
         html += `</div></div>`;
         return html;
+      }
+
+      function renderJournalView() {
+        const dates = Object.keys(state.journal || {}).sort().reverse();
+        let html = `<div class="card"><div class="card-header"><div><div class="card-title">Habit Journal</div><div style="color:var(--text-muted);font-size:.8rem">Review reasons, reflections and progress notes by date</div></div><button class="btn btn-primary btn-sm" id="journalTodayBtn">Add today's reflection</button></div>`;
+        if (!dates.length) return html + `<div class="empty"><h3>Your journal starts here</h3><p>Open a habit's reflection from Today to record what happened.</p></div></div>`;
+        dates.forEach((date) => {
+          const entries = state.journal[date] || {};
+          const records = Object.entries(entries);
+          if (!records.length) return;
+          html += `<div class="journal-date-group"><h3>${escapeHtml(formatDisplay(parseISO(date)))}</h3>`;
+          records.forEach(([habitId, entry]) => {
+            const habit = state.habits.find((h) => h.id === habitId);
+            const name = habit ? habit.name : "Habit no longer available";
+            html += `<article class="journal-entry"><div class="journal-entry-head"><strong>${escapeHtml(name)}</strong><span class="tag">${escapeHtml(entry.reason || "Reflection")}</span><button class="btn btn-ghost btn-sm" data-journal-edit="${escapeHtml(habitId)}" data-journal-date="${date}">Edit</button></div><p>${escapeHtml(entry.reflection || "No written reflection.")}</p></article>`;
+          });
+          html += `</div>`;
+        });
+        return html + `</div>`;
+      }
+
+      function renderAchievements() {
+        const active = state.habits.filter((h) => !h.archived);
+        const completedCount = active.reduce((sum,h) => sum + Object.keys(h.completed || {}).filter(d => progressPercent(h,d) === 100).length, 0);
+        const best = active.reduce((m,h) => Math.max(m,calcBestStreak(h)),0);
+        const current = active.reduce((m,h) => Math.max(m,calcStreak(h)),0);
+        const achievements = [
+          ["First Step", "Complete your first habit target", completedCount >= 1, "🌱"],
+          ["Seven-Day Rhythm", "Build a 7-day consistency streak", best >= 7, "🔥"],
+          ["Monthly Momentum", "Build a 30-day consistency streak", best >= 30, "🏅"],
+          ["Ten Completions", "Reach 10 completed habit-days", completedCount >= 10, "⭐"],
+          ["Half Century", "Reach 50 completed habit-days", completedCount >= 50, "🏆"],
+          ["Century Club", "Reach 100 completed habit-days", completedCount >= 100, "💎"],
+        ];
+        return `<section class="card" style="margin-top:16px"><div class="card-header"><div><div class="card-title">Achievements & Milestones</div><div style="color:var(--text-muted);font-size:.8rem">Earned automatically from your recorded history</div></div><span class="tag">${achievements.filter(a=>a[2]).length}/${achievements.length} unlocked</span></div><div class="achievement-grid">${achievements.map(([name,desc,unlocked,icon]) => `<div class="achievement ${unlocked ? "unlocked" : "locked"}"><span class="achievement-icon">${icon}</span><div><strong>${name}</strong><p>${desc}</p><small>${unlocked ? "Unlocked" : "Not yet achieved"}</small></div></div>`).join("")}</div><div class="personal-records"><div><span>Best current consistency</span><strong>${current} days</strong></div><div><span>Personal best consistency</span><strong>${best} days</strong></div><div><span>Full target completions</span><strong>${completedCount}</strong></div></div></section>`;
       }
 
       function renderHabitsList() {
@@ -2109,10 +2594,17 @@
           </div>`;
         });
         html += `</div></div>`;
+        html += renderAchievements();
         return html;
       }
 
       function initCharts() {
+        if (typeof Chart === "undefined") {
+          const a = document.getElementById("chartTrend"), b = document.getElementById("chartHabits");
+          if (a?.parentElement) a.parentElement.innerHTML = "<p class='muted'>Charts need the Chart.js library. Your habit data remains available offline.</p>";
+          if (b?.parentElement) b.parentElement.innerHTML = "<p class='muted'>Charts need the Chart.js library.</p>";
+          return;
+        }
         // destroy old
         Object.values(charts).forEach((c) => c.destroy());
         charts = {};
@@ -2126,13 +2618,7 @@
           labels.push(
             d.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
           );
-          let done = 0;
-          active.forEach((h) => {
-            if (isDone(h, s)) done++;
-          });
-          data.push(
-            active.length ? Math.round((done / active.length) * 100) : 0,
-          );
+          data.push(getDailyCompletionPercent(s));
         }
 
         const ctx1 = document.getElementById("chartTrend");
@@ -2192,8 +2678,8 @@
               ),
               datasets: [
                 {
-                  label: "30-day rate",
-                  data: active.map((h) => completionRate(h, 30)),
+                  label: "30-day average progress",
+                  data: active.map((h) => averageProgressRate(h, 30)),
                   backgroundColor: active.map((h) => h.color),
                   borderRadius: 6,
                 },
@@ -2238,6 +2724,7 @@
           // for count/duration, toggle to target or 0
           h.completed[dateStr] = isDone(h, dateStr) ? 0 : h.target || 1;
         }
+        auditEvent(isDone(h, dateStr) ? "Habit completed" : "Habit unmarked", `${h.name} · ${dateStr}`);
         save();
         render();
         toast(isDone(h, dateStr) ? "Completed ✓" : "Unmarked");
@@ -2248,12 +2735,27 @@
         let val = Number(h.completed[dateStr] || 0) + delta;
         if (val < 0) val = 0;
         h.completed[dateStr] = val;
+        auditEvent("Habit progress changed", `${h.name} · ${dateStr} · ${val}`);
         save();
         render();
       }
       function deleteHabit(id) {
         if (!confirm("Delete this habit and all its history?")) return;
+        state.deletedHabitIds ||= [];
+        if (!state.deletedHabitIds.includes(id)) state.deletedHabitIds.push(id);
+        const deletedHabit = state.habits.find((h) => h.id === id);
         state.habits = state.habits.filter((h) => h.id !== id);
+        state.habits.forEach(h => { if (h.dependsOn === id) delete h.dependsOn; });
+        if (state.features) {
+          state.features.goals = state.features.goals.filter(g => g.habitId !== id);
+          state.features.routines = state.features.routines.map(r => ({...r, habitIds:r.habitIds.filter(habitId=>habitId!==id)}));
+          delete state.features.scheduleOverrides[id];
+        }
+        auditEvent("Habit deleted", deletedHabit?.name || id);
+        Object.keys(state.journal || {}).forEach(date => {
+          delete state.journal[date][id];
+          if (!Object.keys(state.journal[date]).length) delete state.journal[date];
+        });
         save();
         render();
         toast("Habit deleted");
@@ -2267,6 +2769,11 @@
           : "Add Habit";
         document.getElementById("habitForm").reset();
         document.getElementById("targetRow").style.display = "none";
+        document.getElementById("hReminderEnabled").value = "false";
+        document.getElementById("hReminderTime").value = "09:00";
+        document.getElementById("hFrequency").value = "daily";
+        document.getElementById("hDays").value = "";
+        document.getElementById("hDaysWrap").style.display = "none";
         document
           .querySelectorAll(".color-swatch")
           .forEach((s) => s.classList.remove("selected"));
@@ -2288,9 +2795,14 @@
             document.getElementById("hName").value = h.name;
             document.getElementById("hCategory").value = h.category || "";
             document.getElementById("hType").value = h.type;
+            document.getElementById("hFrequency").value = h.schedule?.frequency || "daily";
+            document.getElementById("hDays").value = (h.schedule?.days || []).join(",");
+            document.getElementById("hDaysWrap").style.display = h.schedule?.frequency === "custom" ? "block" : "none";
             document.getElementById("hTarget").value = h.target || 1;
             document.getElementById("hUnit").value = h.unit || "";
             document.getElementById("hStartTime").value = h.startTime || "";
+            document.getElementById("hReminderEnabled").value = String(!!h.reminderEnabled);
+            document.getElementById("hReminderTime").value = h.reminderTime || h.startTime || "09:00";
             selectedColor = h.color;
             document.querySelectorAll(".color-swatch").forEach((s) => {
               s.classList.toggle("selected", s.dataset.color === h.color);
@@ -2300,6 +2812,36 @@
           }
         }
         document.getElementById("habitModal").classList.add("open");
+      }
+
+      let activeJournalHabitId = null;
+      let activeJournalDate = null;
+      function openJournal(habitId, dateStr) {
+        const habit = state.habits.find((h) => h.id === habitId);
+        if (!habit) return;
+        activeJournalHabitId = habitId;
+        activeJournalDate = dateStr || todayISO();
+        const entry = state.journal?.[activeJournalDate]?.[habitId] || {};
+        document.getElementById("journalTitle").textContent = `${habit.name} · Reflection`;
+        document.getElementById("journalDateLabel").textContent = formatDisplay(parseISO(activeJournalDate));
+        document.getElementById("journalReason").value = entry.reason || "";
+        document.getElementById("journalReflection").value = entry.reflection || "";
+        document.getElementById("journalModal").classList.add("open");
+      }
+      function saveJournalEntry() {
+        if (!activeJournalHabitId || !activeJournalDate) return;
+        state.journal ||= {};
+        state.journal[activeJournalDate] ||= {};
+        const reason = document.getElementById("journalReason").value;
+        const reflection = document.getElementById("journalReflection").value.trim();
+        if (!reason && !reflection) delete state.journal[activeJournalDate][activeJournalHabitId];
+        else state.journal[activeJournalDate][activeJournalHabitId] = { reason, reflection, updatedAt: new Date().toISOString() };
+        if (!Object.keys(state.journal[activeJournalDate]).length) delete state.journal[activeJournalDate];
+        auditEvent("Habit reflection saved", `${activeJournalHabitId} · ${activeJournalDate}`);
+        save();
+        document.getElementById("journalModal").classList.remove("open");
+        render();
+        toast("Reflection saved");
       }
 
       // ===================== BINDINGS =====================
@@ -2321,6 +2863,21 @@
         });
         const notesBtn = document.getElementById("openNotesBtn");
         if (notesBtn) notesBtn.onclick = () => openNotes();
+        document.querySelectorAll('[data-action="journal"]').forEach((el) => {
+          el.onclick = () => openJournal(el.dataset.id, el.dataset.date);
+        });
+        document.querySelectorAll("[data-period]").forEach((el) => {
+          el.onclick = () => { performancePeriod = Number(el.dataset.period); render(); };
+        });
+        document.querySelectorAll("[data-journal-edit]").forEach((el) => {
+          el.onclick = () => openJournal(el.dataset.journalEdit, el.dataset.journalDate);
+        });
+        const journalToday = document.getElementById("journalTodayBtn");
+        if (journalToday) journalToday.onclick = () => {
+          const first = state.habits.find(h => !h.archived);
+          if (first) openJournal(first.id, todayISO());
+          else toast("Add a habit before creating a habit reflection");
+        };
       }
 
       // Static event listeners
@@ -2339,6 +2896,7 @@
 
       document.getElementById("themeToggle").onclick = () => {
         applyTheme(state.settings.theme === "dark" ? "light" : "dark");
+        save();
         if (currentView === "analytics") render();
       };
 
@@ -2351,6 +2909,9 @@
       document.getElementById("hType").onchange = (e) => {
         document.getElementById("targetRow").style.display =
           e.target.value === "boolean" ? "none" : "grid";
+      };
+      document.getElementById("hFrequency").onchange = (e) => {
+        document.getElementById("hDaysWrap").style.display = e.target.value === "custom" ? "block" : "none";
       };
       document.querySelectorAll(".color-swatch").forEach((s) => {
         s.onclick = () => {
@@ -2366,6 +2927,9 @@
         e.preventDefault();
         const name = document.getElementById("hName").value.trim();
         if (!name) return;
+        const chosenFrequency = document.getElementById("hFrequency").value;
+        const chosenDays = [...new Set(document.getElementById("hDays").value.split(",").map(v=>v.trim()).filter(v=>v !== "").map(Number).filter(v=>Number.isInteger(v)&&v>=0&&v<=6))];
+        if (chosenFrequency === "custom" && !chosenDays.length) { toast("Select at least one weekday (0=Sunday through 6=Saturday)."); return; }
         const data = {
           name,
           category: document.getElementById("hCategory").value.trim(),
@@ -2373,11 +2937,15 @@
           target: Number(document.getElementById("hTarget").value) || 1,
           unit: document.getElementById("hUnit").value.trim(),
           startTime: document.getElementById("hStartTime").value || "",
+          reminderEnabled: document.getElementById("hReminderEnabled").value === "true",
+          reminderTime: document.getElementById("hReminderTime").value || document.getElementById("hStartTime").value || "09:00",
+          schedule: { frequency: chosenFrequency, days: chosenDays },
           color: selectedColor,
         };
         if (editingId) {
           const h = state.habits.find((x) => x.id === editingId);
           if (h) Object.assign(h, data);
+          auditEvent("Habit updated", name);
           toast("Habit updated");
         } else {
           state.habits.push({
@@ -2386,9 +2954,15 @@
             completed: {},
             created: todayISO(),
           });
+          auditEvent("Habit created", name);
           toast("Habit added");
         }
         save();
+        if (data.reminderEnabled && "Notification" in window && Notification.permission === "default") {
+          Notification.requestPermission().then(permission => {
+            if (permission !== "granted") toast("Allow notifications in browser settings to receive habit reminders");
+          });
+        }
         document.getElementById("habitModal").classList.remove("open");
         render();
       };
@@ -2424,6 +2998,10 @@
         render();
       };
 
+      document.getElementById("closeJournal").onclick = () => document.getElementById("journalModal").classList.remove("open");
+      document.getElementById("cancelJournal").onclick = () => document.getElementById("journalModal").classList.remove("open");
+      document.getElementById("saveJournal").onclick = saveJournalEntry;
+
       // Notes
       function openNotes() {
         const s = iso(viewDate);
@@ -2440,6 +3018,7 @@
       document.getElementById("saveNotes").onclick = () => {
         const s = iso(viewDate);
         state.notes[s] = document.getElementById("notesText").value;
+        auditEvent("Daily notes saved", s);
         save();
         document.getElementById("notesModal").classList.remove("open");
         if (currentView === "today") render();
@@ -2478,25 +3057,54 @@
 
       let reminderTimer = null;
       function scheduleReminder() {
-        if (reminderTimer) clearTimeout(reminderTimer);
-        if (!state.settings.reminderEnabled) return;
-        const [hh, mm] = (state.settings.reminderTime || "09:00")
-          .split(":")
-          .map(Number);
-        const now = new Date();
-        let target = new Date();
-        target.setHours(hh, mm, 0, 0);
-        if (target <= now) target = addDays(target, 1);
-        const ms = target - now;
-        reminderTimer = setTimeout(() => {
-          if (Notification.permission === "granted") {
-            new Notification("HabitDash Reminder", {
-              body: "Time to check off your habits for today!",
-              icon: undefined,
-            });
+        if (reminderTimer) clearInterval(reminderTimer);
+        if (!currentUser) return;
+        reminderTimer = setInterval(() => {
+          if (!("Notification" in window) || Notification.permission !== "granted") return;
+          const now = new Date();
+          const hhmm = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+          const today = todayISO();
+          state.settings.reminderSent ||= {};
+          state.habits.filter(h => !h.archived && h.reminderEnabled && h.reminderTime === hhmm).forEach(h => {
+            const key = `${h.id}:${today}`;
+            if (state.settings.reminderSent[key] || progressPercent(h,today) === 100) return;
+            new Notification(`Habit reminder: ${h.name}`, { body: `Your planned time is ${h.reminderTime}. Record your progress in HabitDash.` });
+            state.settings.reminderSent[key] = true;
+            save();
+          });
+          if (state.settings.reminderEnabled && state.settings.reminderTime === hhmm && !state.settings.reminderSent[`daily:${today}`]) {
+            new Notification("HabitDash daily reminder", { body: "Review your habits and record today's progress." });
+            state.settings.reminderSent[`daily:${today}`] = true;
+            save();
           }
-          scheduleReminder(); // reschedule next day
-        }, ms);
+        }, 30000);
+      }
+
+      // Versioned JSON backup and validated restore
+      function downloadJSONBackup() {
+        const payload = { app: "HabitDash", schemaVersion: 1, exportedAt: new Date().toISOString(), data: state };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a"); a.href = url; a.download = `habitdash-backup-${todayISO()}.json`; a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        toast("JSON backup downloaded");
+      }
+      async function restoreJSONBackup(file) {
+        if (!file) return;
+        try {
+          if (file.size > 10 * 1024 * 1024) throw new Error("Backup file is larger than 10 MB.");
+          const parsed = JSON.parse(await file.text());
+          const candidate = parsed?.app === "HabitDash" ? parsed.data : parsed;
+          if (!candidate || !Array.isArray(candidate.habits) || typeof candidate.notes !== "object") throw new Error("This file is not a valid HabitDash backup.");
+          if (!confirm("Restore this backup? Current habits, notes and journal entries in this account will be replaced.")) return;
+          state = normalizeState(candidate);
+          save(); applyTheme(state.settings.theme || "dark"); render(); scheduleReminder();
+          toast("Backup restored and sync queued");
+        } catch (error) {
+          alert(`Restore failed: ${error.message}`);
+        } finally {
+          document.getElementById("restoreJSONFile").value = "";
+        }
       }
 
       // Export
@@ -2505,15 +3113,15 @@
       document.getElementById("closeExport").onclick = () =>
         document.getElementById("exportModal").classList.remove("open");
       document.getElementById("exportCSV").onclick = () => {
-        let csv = "Habit,Category,Start Time (24h),Type,Target,Unit,Date,Value,Completed\n";
+        let csv = "Habit,Category,Start Time (24h),Type,Target,Unit,Date,Value,Progress %,Full Target Completed\n";
         state.habits.forEach((h) => {
           const dates = Object.keys(h.completed).sort();
           if (dates.length === 0) {
-            csv += `"${h.name}","${h.category || ""}","${h.startTime || ""}",${h.type},${h.target || 1},"${h.unit || ""}",,,\n`;
+            csv += `"${h.name}","${h.category || ""}","${h.startTime || ""}",${h.type},${h.target || 1},"${h.unit || ""}",,,0,false\n`;
           } else {
             dates.forEach((d) => {
               const val = h.completed[d];
-              csv += `"${h.name}","${h.category || ""}","${h.startTime || ""}",${h.type},${h.target || 1},"${h.unit || ""}",${d},${val},${isDone(h, d)}\n`;
+              csv += `"${h.name}","${h.category || ""}","${h.startTime || ""}",${h.type},${h.target || 1},"${h.unit || ""}",${d},${val},${progressPercent(h, d)},${isDone(h, d)}\n`;
             });
           }
         });
@@ -2529,6 +3137,134 @@
         document.getElementById("exportModal").classList.remove("open");
         window.print();
       };
+      document.getElementById("backupJSON").onclick = downloadJSONBackup;
+      document.getElementById("restoreJSONBtn").onclick = () => document.getElementById("restoreJSONFile").click();
+      document.getElementById("restoreJSONFile").onchange = (e) => restoreJSONBackup(e.target.files?.[0]);
+      document.getElementById("syncNowBtn").onclick = async () => {
+        if (!currentUser) { toast("Sign in to synchronize your data"); return; }
+        const ok = await syncToCloud();
+        toast(ok ? "Your data is synchronized" : "Sync failed; local data is retained");
+      };
+
+      // ===================== NEXT-PHASE WORKSPACE =====================
+      let focusInterval = null;
+      let focusRemaining = 25 * 60;
+      let focusInitialized = false;
+      let focusRunning = false;
+      let focusMode = "work";
+      let installPromptEvent = null;
+      window.addEventListener("beforeinstallprompt", (event) => { event.preventDefault(); installPromptEvent = event; });
+      window.addEventListener("online", () => { updateConnectivityBanner(); if (currentUser && hasPendingLocalChanges) scheduleCloudSync(); });
+      window.addEventListener("offline", updateConnectivityBanner);
+      function updateConnectivityBanner() {
+        const el = document.getElementById("offlineBanner");
+        if (el) { el.classList.toggle("show", !navigator.onLine); el.textContent = navigator.onLine ? "" : "Offline mode: changes are saved on this device and cloud sync will retry when you reconnect."; }
+      }
+      function workspaceHabitOptions(selected="") {
+        return state.habits.filter(h=>!h.archived).map(h=>`<option value="${escapeHtml(h.id)}" ${h.id===selected?"selected":""}>${escapeHtml(h.name)}</option>`).join("");
+      }
+      function dueHabitsFor(date) {
+        const key = iso(date);
+        return state.habits.filter(h=>!h.archived && habitIsDue(h,key)).sort((a,b)=>(a.startTime||"99:99").localeCompare(b.startTime||"99:99"));
+      }
+      function renderWorkspace() {
+        state.features = normalizeFeatures(state.features);
+        const f = state.features;
+        if (!focusInitialized) { focusRemaining = f.focus.workMinutes * 60; focusInitialized = true; }
+        const due = dueHabitsFor(new Date());
+        const completed = due.filter(h=>isDone(h,todayISO())).length;
+        const q = "";
+        const overdue = state.habits.filter(h=>!h.archived && habitIsDue(h,iso(addDays(new Date(),-1))) && !isDone(h,iso(addDays(new Date(),-1))));
+        const planHtml = due.length ? due.map(h=>`<div class="workspace-row"><div><strong>${escapeHtml(h.name)}</strong><div class="muted">${h.startTime?`Scheduled ${escapeHtml(h.startTime)}`:"No time set"} · ${escapeHtml(h.category||"Uncategorised")}</div></div><span class="pill-tag">${isDone(h,todayISO())?"Done":"Due"}</span></div>`).join("") : `<p>No habits are scheduled for today. Review your schedule or add a habit.</p>`;
+        const goalHtml = f.goals.length ? f.goals.map(g=>{const pct=featureGoalProgress(g);return `<div class="workspace-row"><div style="flex:1;min-width:0"><strong>${escapeHtml(g.title)}</strong><div class="muted">${pct}% · ${escapeHtml(state.habits.find(h=>h.id===g.habitId)?.name||"Habit removed")}</div><div class="progress-wrap"><div class="progress-bar" style="width:${pct}%;background:var(--success)"></div></div></div><button class="btn btn-danger btn-sm" data-ws="delete-goal" data-id="${escapeHtml(g.id)}">Remove</button></div>`}).join("") : `<p>No goals yet. Create a measurable goal linked to a habit.</p>`;
+        const routineHtml = f.routines.length ? f.routines.map(r=>`<div class="workspace-row"><div><strong>${escapeHtml(r.name)}</strong><div class="muted">${r.habitIds.map(id=>state.habits.find(h=>h.id===id)?.name).filter(Boolean).map(escapeHtml).join(", ")||"No linked habits"}</div></div><button class="btn btn-danger btn-sm" data-ws="delete-routine" data-id="${escapeHtml(r.id)}">Remove</button></div>`).join("") : `<p>Group habits into morning, evening, study or custom routines.</p>`;
+        const mood = f.moodLogs[todayISO()] || {};
+        const moodHtml = `<div class="workspace-row"><span>Today's mood</span><strong>${mood.mood?escapeHtml(mood.mood):"Not recorded"}</strong></div><div class="workspace-row"><span>Energy level</span><strong>${mood.energy?`${mood.energy}/5`:"Not recorded"}</strong></div>`;
+        const logs = f.audit.slice(-8).reverse().map(a=>`<div class="workspace-row"><div><strong>${escapeHtml(a.action)}</strong><div class="muted">${escapeHtml(a.details||"")}</div></div><span class="muted">${new Date(a.at).toLocaleString()}</span></div>`).join("") || `<p>Activity history will appear here as you make changes.</p>`;
+        const recoveryHtml = overdue.length ? overdue.map(h=>`<div class="workspace-row"><div><strong>${escapeHtml(h.name)}</strong><div class="muted">Missed yesterday · recover without changing the original record</div></div><button class="btn btn-primary btn-sm" data-ws="recover" data-id="${escapeHtml(h.id)}">Move to today</button></div>`).join("") : `<p>No missed habits from yesterday. Keep your plan realistic and restart when needed.</p>`;
+        const goalOptions = workspaceHabitOptions();
+        const searchHtml = `<input class="workspace-input" id="habitSearch" placeholder="Search habits by name or category…" aria-label="Search habits"><select class="workspace-input" id="habitFilter"><option value="all">All categories</option>${[...new Set(state.habits.map(h=>h.category).filter(Boolean))].sort().map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}</select><div id="habitSearchResults"></div>`;
+        return `<div id="offlineBanner" class="offline-banner ${navigator.onLine?"":"show"}">${navigator.onLine?"":"Offline mode: changes are saved on this device and cloud sync will retry when you reconnect."}</div>
+          <div class="card"><div class="card-header"><div><div class="card-title">Your next-phase workspace</div><div class="muted">Planning, routines, goals, recovery, focus and personal insights.</div></div><div class="pill-tag">${due.length} scheduled today · ${completed} completed</div></div>
+          <div class="workspace-actions"><button class="btn btn-ghost btn-sm" id="privacyToggle">${f.privacyMask?"Show private values":"Hide private values"}</button><button class="btn btn-ghost btn-sm" id="installAppBtn">Install / PWA help</button><span class="muted" id="connectionState">${navigator.onLine?"Online":"Offline"}</span></div></div>
+          <div class="workspace-grid">
+            <section class="workspace-card" style="${f.dashboard.showPlan?"":"display:none"}"><h3>✦ Intelligent daily plan</h3><p>Today's due habits, ordered by scheduled start time. Use the existing Today view to record completion.</p><div style="margin-top:10px">${planHtml}</div><div class="workspace-actions"><button class="btn btn-ghost btn-sm" id="goTodayBtn">Open Today</button></div></section>
+            <section class="workspace-card"><h3>📈 Advanced performance intelligence</h3><p>Schedule-aware completion rate; non-scheduled days are not counted against you.</p><div class="workspace-row"><span>7-day rate</span><strong class="private-value">${aggregateRate(7)}%</strong></div><div class="workspace-row"><span>14-day rate</span><strong class="private-value">${aggregateRate(14)}%</strong></div><div class="workspace-row"><span>30-day rate</span><strong class="private-value">${aggregateRate(30)}%</strong></div><div class="muted">The Analytics analyser continues to offer exactly 7, 14 and 30 days.</div></section>
+            <section class="workspace-card"><h3>🗓 Flexible habit scheduling</h3><p>Choose daily, weekdays or selected weekdays when creating or editing a habit.</p><div class="workspace-row"><span>Daily</span><span class="pill-tag">Every day</span></div><div class="workspace-row"><span>Weekdays</span><span class="pill-tag">Mon–Fri</span></div><div class="workspace-row"><span>Custom</span><span class="pill-tag">Choose 0–6</span></div></section>
+            <section class="workspace-card"><h3>🔗 Habit dependencies & routines</h3><p>Build named routine groups and define prerequisites. Dependencies are guidance and do not silently block completion.</p><label class="muted" for="routineName">New routine name</label><input id="routineName" class="workspace-input" placeholder="e.g. Morning routine"><label class="muted" for="routineHabits">Include habit</label><select id="routineHabits" class="workspace-input"><option value="">Select habit</option>${goalOptions}</select><button class="btn btn-primary btn-sm" id="addRoutineBtn">Create / add to routine</button><div style="margin-top:8px">${routineHtml}</div><hr style="border:0;border-top:1px solid var(--border);margin:12px 0"><label class="muted" for="depHabit">This habit depends on…</label><select id="depHabit" class="workspace-input"><option value="">Choose dependent habit</option>${goalOptions}</select><label class="muted" for="depPrereq">Prerequisite habit</label><select id="depPrereq" class="workspace-input"><option value="">Choose prerequisite</option>${goalOptions}</select><button class="btn btn-ghost btn-sm" id="saveDependencyBtn">Save dependency</button><div id="dependencyList" style="margin-top:8px">${state.habits.filter(h=>h.dependsOn).map(h=>`<div class="workspace-row"><span>${escapeHtml(h.name)} ← ${escapeHtml(state.habits.find(x=>x.id===h.dependsOn)?.name||"missing habit")}</span><button class="btn btn-danger btn-sm" data-ws="clear-dependency" data-id="${escapeHtml(h.id)}">Remove</button></div>`).join("")||'<p class="muted">No dependencies defined.</p>'}</div></section>
+            <section class="workspace-card" style="${f.dashboard.showGoals?"":"display:none"}"><h3>🎯 Intelligent goal management</h3><p>Set a target number of completed days for a selected habit.</p><label class="muted" for="goalTitle">Goal name</label><input id="goalTitle" class="workspace-input" maxlength="80" placeholder="e.g. Read 20 days this month"><label class="muted" for="goalHabit">Linked habit</label><select id="goalHabit" class="workspace-input"><option value="">Select habit</option>${goalOptions}</select><label class="muted" for="goalTarget">Target completed days</label><input id="goalTarget" class="workspace-input" type="number" min="1" max="365" value="20"><button class="btn btn-primary btn-sm" id="addGoalBtn">Create goal</button><div style="margin-top:8px">${goalHtml}</div></section>
+            <section class="workspace-card"><h3>↻ Missed-habit recovery</h3><p>Move a missed habit into today's plan without rewriting the original completion history.</p>${recoveryHtml}</section>
+            <section class="workspace-card"><h3>🧾 Data audit history</h3><p>Recent local activity records. The latest 300 entries are retained in your HabitDash data.</p>${logs}<div class="workspace-actions"><button class="btn btn-ghost btn-sm" id="exportAuditBtn">Export audit CSV</button></div></section>
+            <section class="workspace-card"><h3>🌤 Mood & energy tracking</h3><p>Record a brief daily check-in. Entries are stored with your HabitDash data.</p>${moodHtml}<label class="muted" for="moodSelect">Mood</label><select id="moodSelect" class="workspace-input"><option value="">Choose mood</option>${["Great","Good","Okay","Low","Stressed"].map(x=>`<option ${mood.mood===x?"selected":""}>${x}</option>`).join("")}</select><label class="muted" for="energySelect">Energy (1–5)</label><select id="energySelect" class="workspace-input"><option value="">Choose energy</option>${[1,2,3,4,5].map(x=>`<option value="${x}" ${Number(mood.energy)===x?"selected":""}>${x}</option>`).join("")}</select><button class="btn btn-primary btn-sm" id="saveMoodBtn">Save check-in</button></section>
+            <section class="workspace-card" style="${f.dashboard.showFocus?"":"display:none"}"><h3>⏱ Focus mode & Pomodoro</h3><p>Work and break intervals are configurable. Keep this tab open while the timer runs.</p><div class="timer-display" id="focusTimer">${String(Math.floor(focusRemaining/60)).padStart(2,"0")}:${String(focusRemaining%60).padStart(2,"0")}</div><div class="muted" id="focusModeLabel">${focusMode==="work"?"Focus session":"Break"} · ${f.focus.sessions} completed sessions</div><label class="muted" for="workLength">Focus minutes</label><input class="workspace-input" id="workLength" type="number" min="1" max="180" value="${f.focus.workMinutes}"><label class="muted" for="breakLength">Break minutes</label><input class="workspace-input" id="breakLength" type="number" min="1" max="60" value="${f.focus.breakMinutes}"><div class="workspace-actions"><button class="btn btn-primary btn-sm" id="focusStartBtn">${focusRunning?"Pause":"Start"}</button><button class="btn btn-ghost btn-sm" id="focusResetBtn">Reset</button><button class="btn btn-ghost btn-sm" id="focusSkipBtn">Skip interval</button></div></section>
+            <section class="workspace-card"><h3>▦ Custom dashboard</h3><p>Choose which planning widgets are highlighted in this workspace.</p><label class="workspace-row"><span>Show daily plan</span><input type="checkbox" id="dashPlan" ${f.dashboard.showPlan?"checked":""}></label><label class="workspace-row"><span>Show goals</span><input type="checkbox" id="dashGoals" ${f.dashboard.showGoals?"checked":""}></label><label class="workspace-row"><span>Show focus timer</span><input type="checkbox" id="dashFocus" ${f.dashboard.showFocus?"checked":""}></label><p class="muted">Preferences are saved to your account data. All tools remain available below.</p></section>
+            <section class="workspace-card"><h3>⌕ Search & filtering</h3><p>Find habits by name or category.</p>${searchHtml}</section>
+            <section class="workspace-card"><h3>🔒 Privacy & account security</h3><p>Mask personal dashboard values on this screen. Your existing Supabase sign-in remains the account authentication layer.</p><div class="workspace-row"><span>Privacy mask</span><strong>${f.privacyMask?"Enabled":"Disabled"}</strong></div><div class="muted">Do not treat browser-local storage as encrypted storage. Use a trusted device and sign out when finished.</div><div class="workspace-actions"><button class="btn btn-ghost btn-sm" id="privacyToggle2">Toggle privacy mask</button><button class="btn btn-ghost btn-sm" id="accountSecurityBtn">Account panel</button></div></section>
+            <section class="workspace-card"><h3>📲 Offline & PWA readiness</h3><p>Habit changes continue to save locally while offline; existing cloud sync retries after reconnection.</p><div class="muted">Offline edits are saved locally and sync retries after reconnection. Full installable app-shell caching requires the companion manifest and service-worker files on the same HTTPS origin.</div><div class="workspace-actions"><button class="btn btn-ghost btn-sm" id="pwaDetailsBtn">PWA requirements</button></div></section>
+          </div>`;
+      }
+      function aggregateRate(days) {
+        let done=0,total=0;
+        state.habits.filter(h=>!h.archived).forEach(h=>{ for(let i=0;i<days;i++){const d=iso(addDays(new Date(),-i));if(d<=todayISO()&&habitIsDue(h,d)){total++;if(isDone(h,d))done++;}} });
+        return total?Math.round(done/total*100):0;
+      }
+      function bindWorkspaceEvents() {
+        updateConnectivityBanner();
+        const byId=id=>document.getElementById(id);
+        const saveAndRender=()=>{save();render();};
+        byId("goTodayBtn")?.addEventListener("click",()=>setView("today"));
+        const privacy=()=>{state.features.privacyMask=!state.features.privacyMask;document.body.classList.toggle("privacy-mode",state.features.privacyMask);save();render();};
+        byId("privacyToggle")?.addEventListener("click",privacy); byId("privacyToggle2")?.addEventListener("click",privacy);
+        document.body.classList.toggle("privacy-mode",!!state.features.privacyMask);
+        byId("accountSecurityBtn")?.addEventListener("click",()=>{document.getElementById("accountPanel")?.scrollIntoView({behavior:"smooth",block:"center"});});
+        byId("installAppBtn")?.addEventListener("click",async()=>{if(installPromptEvent){installPromptEvent.prompt();await installPromptEvent.userChoice;installPromptEvent=null;}else alert("For installability, host the HTML, habitdash.webmanifest, habitdash-sw.js and habitdash-icon.svg together over HTTPS. A standalone file opened with file:// cannot register a service worker.");});
+        byId("pwaDetailsBtn")?.addEventListener("click",()=>alert("PWA deployment checklist: upload the HTML, habitdash.webmanifest, habitdash-sw.js and habitdash-icon.svg to the same HTTPS folder; open the page online once; then test installation and offline reload. Offline data edits are stored locally; Supabase sign-in and cloud sync still need connectivity."));
+        byId("addGoalBtn")?.addEventListener("click",()=>{const title=byId("goalTitle").value.trim(),habitId=byId("goalHabit").value,target=Number(byId("goalTarget").value);if(!title||!habitId||!Number.isInteger(target)||target<1){toast("Enter a goal name, habit and positive target.");return;}state.features.goals.push({id:uid(),title,habitId,target,startDate:todayISO(),createdAt:new Date().toISOString()});auditEvent("Goal created",title);saveAndRender();});
+        byId("addRoutineBtn")?.addEventListener("click",()=>{const name=byId("routineName").value.trim(),habitId=byId("routineHabits").value;if(!name||!habitId){toast("Enter a routine name and choose a habit.");return;}let r=state.features.routines.find(x=>x.name.toLowerCase()===name.toLowerCase());if(!r){r={id:uid(),name,habitIds:[]};state.features.routines.push(r);}if(!r.habitIds.includes(habitId))r.habitIds.push(habitId);auditEvent("Routine updated",name);saveAndRender();});
+        byId("saveDependencyBtn")?.addEventListener("click",()=>{const id=byId("depHabit").value,pre=byId("depPrereq").value;if(!id||!pre||id===pre){toast("Choose two different habits.");return;}if(wouldCreateDependencyCycle(id,pre)){toast("That dependency would create a cycle.");return;}const h=state.habits.find(x=>x.id===id);h.dependsOn=pre;auditEvent("Dependency assigned",`${h.name} depends on ${state.habits.find(x=>x.id===pre).name}`);saveAndRender();});
+        document.querySelectorAll('[data-ws="clear-dependency"]').forEach(el=>el.onclick=()=>{const h=state.habits.find(x=>x.id===el.dataset.id);if(!h)return;delete h.dependsOn;auditEvent("Dependency removed",h.name);saveAndRender();});
+        byId("saveMoodBtn")?.addEventListener("click",()=>{const mood=byId("moodSelect").value,energy=Number(byId("energySelect").value);if(!mood||!Number.isInteger(energy)||energy<1||energy>5){toast("Select a mood and energy level.");return;}state.features.moodLogs[todayISO()]={mood,energy,updatedAt:new Date().toISOString()};auditEvent("Mood and energy recorded",`${mood}; energy ${energy}/5`);saveAndRender();});
+        document.querySelectorAll('[data-ws="delete-goal"]').forEach(el=>el.onclick=()=>{state.features.goals=state.features.goals.filter(g=>g.id!==el.dataset.id);auditEvent("Goal removed",el.dataset.id);saveAndRender();});
+        document.querySelectorAll('[data-ws="delete-routine"]').forEach(el=>el.onclick=()=>{state.features.routines=state.features.routines.filter(r=>r.id!==el.dataset.id);auditEvent("Routine removed",el.dataset.id);saveAndRender();});
+        document.querySelectorAll('[data-ws="recover"]').forEach(el=>el.onclick=()=>{const h=state.habits.find(x=>x.id===el.dataset.id);if(!h)return;state.features.scheduleOverrides[h.id]=[...new Set([...(state.features.scheduleOverrides[h.id]||[]),todayISO()])];state.features.recovery.push({habitId:h.id,missedDate:iso(addDays(new Date(),-1)),recoveryDate:todayISO(),at:new Date().toISOString()});auditEvent("Habit recovery scheduled",h.name);saveAndRender();toast("Added to today's plan. Original history was not changed.");});
+        byId("exportAuditBtn")?.addEventListener("click",()=>{const rows=[["Timestamp","Action","Details"],...state.features.audit.map(a=>[a.at,a.action,a.details])];const csv=rows.map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\n");const url=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));const a=document.createElement("a");a.href=url;a.download=`habitdash-audit-${todayISO()}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+        const search=byId("habitSearch"),filter=byId("habitFilter"),results=byId("habitSearchResults");
+        const paint=()=>{if(!results)return;const term=(search?.value||"").toLowerCase(),cat=filter?.value||"all";const found=state.habits.filter(h=>!h.archived&&(cat==="all"||h.category===cat)&&(`${h.name} ${h.category||""}`).toLowerCase().includes(term));results.innerHTML=found.length?found.map(h=>`<div class="workspace-row"><div><strong>${escapeHtml(h.name)}</strong><div class="muted">${escapeHtml(h.category||"Uncategorised")} · ${escapeHtml(h.schedule?.frequency||"daily")}</div></div><button class="btn btn-ghost btn-sm" data-ws-edit="${escapeHtml(h.id)}">Edit</button></div>`).join(""):`<p>No matching habits.</p>`;results.querySelectorAll("[data-ws-edit]").forEach(b=>b.onclick=()=>openHabitModal(b.dataset.wsEdit));};
+        search?.addEventListener("input",paint);filter?.addEventListener("change",paint);paint();
+        ["dashPlan","dashGoals","dashFocus"].forEach(id=>byId(id)?.addEventListener("change",()=>{state.features.dashboard[id==="dashPlan"?"showPlan":id==="dashGoals"?"showGoals":"showFocus"]=byId(id).checked;save();render();}));
+        byId("workLength")?.addEventListener("change",()=>{state.features.focus.workMinutes=Math.max(1,Math.min(180,Number(byId("workLength").value)||25));if(focusMode==="work"&&!focusRunning){focusRemaining=state.features.focus.workMinutes*60;updateFocusDisplay();}save();});
+        byId("breakLength")?.addEventListener("change",()=>{state.features.focus.breakMinutes=Math.max(1,Math.min(60,Number(byId("breakLength").value)||5));save();});
+        byId("focusStartBtn")?.addEventListener("click",()=>{if(focusRunning){clearInterval(focusInterval);focusRunning=false;byId("focusStartBtn").textContent="Start";}else{focusRunning=true;byId("focusStartBtn").textContent="Pause";focusInterval=setInterval(tickFocus,1000);}});
+        byId("focusResetBtn")?.addEventListener("click",()=>{clearInterval(focusInterval);focusRunning=false;focusRemaining=(focusMode==="work"?state.features.focus.workMinutes:state.features.focus.breakMinutes)*60;updateFocusDisplay();const b=byId("focusStartBtn");if(b)b.textContent="Start";});
+        byId("focusSkipBtn")?.addEventListener("click",()=>{switchFocusMode();});
+      }
+      function updateFocusDisplay(){const el=document.getElementById("focusTimer");if(el)el.textContent=`${String(Math.floor(focusRemaining/60)).padStart(2,"0")}:${String(focusRemaining%60).padStart(2,"0")}`;const label=document.getElementById("focusModeLabel");if(label)label.textContent=`${focusMode==="work"?"Focus session":"Break"} · ${state.features.focus.sessions} completed sessions`;}
+      function tickFocus(){
+        if(focusRemaining>0) focusRemaining--;
+        updateFocusDisplay();
+        if(focusRemaining<=0){
+          clearInterval(focusInterval); focusRunning=false;
+          const completedMode=focusMode;
+          if(completedMode==="work"){state.features.focus.sessions++;auditEvent("Focus session completed",`${state.features.focus.sessions} total`);}
+          save();
+          focusMode=completedMode==="work"?"break":"work";
+          focusRemaining=(focusMode==="work"?state.features.focus.workMinutes:state.features.focus.breakMinutes)*60;
+          render();
+          if("Notification" in window&&Notification.permission==="granted") new Notification("HabitDash Focus",{body:completedMode==="work"?"Focus session complete. Take a break.":"Break complete. Ready for another focus session?"});
+          toast("Timer interval complete");
+        }
+      }
+      function switchFocusMode(){
+        clearInterval(focusInterval); focusRunning=false;
+        focusMode=focusMode==="work"?"break":"work";
+        focusRemaining=(focusMode==="work"?state.features.focus.workMinutes:state.features.focus.breakMinutes)*60;
+        render();
+      }
+      // PWA installability is intentionally not falsely claimed: a service worker must be
+      // served from the same HTTPS origin and cannot be registered from a standalone file.
+      if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+        navigator.serviceWorker.register("./habitdash-sw.js").catch(err=>console.info("Optional HabitDash service worker is not installed:",err.message));
+      }
 
       // ===================== INIT =====================
       load();

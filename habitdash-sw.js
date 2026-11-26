@@ -1,6 +1,6 @@
 /* HabitDash optional PWA service worker.
    Keep this file, the webmanifest, icon and HTML in the same HTTPS folder. */
-const CACHE_NAME = "habitdash-shell-v3";
+const CACHE_NAME = "habitdash-shell-v4";
 const APP_FILE = "./index.html";
 const SHELL_FILES = [
   APP_FILE,

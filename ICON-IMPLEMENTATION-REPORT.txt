@@ -1,0 +1,25 @@
+HabitDash icon implementation review
+
+Changes made:
+1. Kept the supplied portrait artwork and existing icon PNG assets.
+2. Rebuilt icons/favicon.ico as a multi-resolution ICO containing 16x16, 32x32 and 48x48 images. The original ICO contained only one 48x48 image despite the README describing multiple sizes.
+3. Added a scalable-SVG favicon reference while retaining PNG and ICO fallbacks.
+4. Added description and iOS home-screen metadata in index.html; aligned the browser title with the HabitDash product name.
+5. Kept the existing web manifest icon declarations and all existing icon paths.
+6. Bumped the service-worker shell cache from v3 to v4 so existing installations refresh the updated app shell and icon assets.
+7. Updated icons/README.txt to document the actual integration.
+
+Validation performed:
+- Parsed habitdash.webmanifest as valid JSON.
+- Verified the declared 192x192 and 512x512 PWA image dimensions.
+- Verified the maskable icon is 512x512.
+- Verified all local icon, manifest and service-worker precache paths exist.
+- Verified the SVG icon is well-formed XML.
+- Checked the inline application JavaScript and service-worker JavaScript syntax with Node.js.
+
+Preservation:
+- The main application logic, Supabase configuration/integration, data handling and existing UI functionality were not intentionally changed.
+- The icon artwork remains the portrait artwork already present in the uploaded archive. If a different image is intended, replace the source artwork and regenerate the icon set consistently.
+
+Deployment note:
+Upload the contents of the Habit Tracker folder to the same directory in the existing GitHub repository, preserving the icons/ subfolder and filenames. After deployment, open the hosted app online and reload it. If an already-installed PWA still displays its old icon, remove that home-screen installation and install it again; browser and operating-system icon caches can persist independently of the service-worker cache.
